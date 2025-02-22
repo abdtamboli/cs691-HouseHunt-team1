@@ -16,13 +16,19 @@
           - docker.io
         state: present
 
-    - name: Manually Install AWS CLI
+    - name: Check if AWS CLI is installed
+      command: aws --version
+      register: aws_cli_check
+      ignore_errors: yes
+
+    - name: Manually Install AWS CLI (if not installed)
       shell: |
         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
         unzip awscliv2.zip
         sudo ./aws/install
       args:
         creates: /usr/local/bin/aws
+      when: aws_cli_check.rc != 0
 
     - name: Start Docker service
       service:
@@ -32,18 +38,31 @@
 
     - name: Authenticate AWS ECR
       shell: |
-        $(aws ecr get-login-password --region us-east-1) | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
       register: ecr_login
+      retries: 3
+      delay: 5
       ignore_errors: yes
 
     - name: Debug AWS ECR Login Output
       debug:
         msg: "{{ ecr_login.stdout }}"
 
+    - name: Ensure Docker image version file exists
+      stat:
+        path: /var/jenkins_home/workspace/docker_image_version.txt
+      register: docker_image_file
+
     - name: Get the latest Docker image version from Jenkins
       shell: cat /var/jenkins_home/workspace/docker_image_version.txt
       register: docker_image
+      when: docker_image_file.stat.exists
       ignore_errors: yes
+
+    - name: Debug Docker Image Version
+      debug:
+        msg: "Docker Image: {{ docker_image.stdout }}"
+      when: docker_image.stdout is defined and docker_image.stdout | length > 0
 
     - name: Stop and remove existing container (if running)
       shell: |
