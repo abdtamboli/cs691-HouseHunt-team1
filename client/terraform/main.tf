@@ -1,5 +1,5 @@
 provider "aws" {
-  region = var.aws_region
+  region = "us-east-1"  # Directly specifying AWS region
 }
 
 # ✅ Generate SSH Key (For EC2 Access)
@@ -10,13 +10,13 @@ resource "tls_private_key" "ssh_key" {
 
 # ✅ Store Public Key in AWS as a Key Pair
 resource "aws_key_pair" "generated_key" {
-  key_name   = var.key_name
+  key_name   = "jenkins-key"  # Directly specifying key name
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
 # ✅ Create Security Group (Fix Missing Reference)
 resource "aws_security_group" "allow_all" {
-  name        = var.security_group_name
+  name        = "allow-all"
   description = "Allow SSH and HTTP access"
 
   ingress {
@@ -50,8 +50,8 @@ resource "aws_security_group" "allow_all" {
 
 # ✅ Fix: Use `aws_security_group.allow_all.name` Instead of `var.security_group`
 resource "aws_instance" "frontend_server" {
-  ami             = var.ami_id
-  instance_type   = var.instance_type
+  ami             = "ami-04b4f1a9cf54c11d0"  # Directly specifying AMI ID
+  instance_type   = "t2.medium"  # Directly specifying instance type
   key_name        = aws_key_pair.generated_key.key_name
   security_groups = [aws_security_group.allow_all.name]
 
