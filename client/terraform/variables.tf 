@@ -4,21 +4,21 @@ variable "aws_region" {
 }
 
 variable "instance_type" {
-  description = "EC2 Instance type"
+  description = "Instance type"
   default     = "t2.medium"
 }
 
 variable "key_name" {
-  description = "SSH Key Name"
+  description = "SSH key name"
   default     = "jenkins-key"
 }
 
 variable "ami_id" {
-  description = "Latest Ubuntu AMI ID"
-  default     = "ami-04b4f1a9cf54c11d0"  # Update to latest Ubuntu AMI
+  description = "AMI ID for EC2"
+  default     = "ami-04b4f1a9cf54c11d0"
 }
 
-variable "security_group_name" {
+variable "security_group" {
   description = "Security group for EC2"
   default     = "allow-all"
 }
