@@ -36,12 +36,16 @@
         state: started
         enabled: yes
 
-    - name: Authenticate AWS ECR
+    - name: Set AWS Credentials for ECR Login
       shell: |
+        export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
+        export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
+        export AWS_SESSION_TOKEN=$(aws configure get aws_session_token)
         aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
       register: ecr_login
       retries: 3
       delay: 5
+      until: ecr_login.rc == 0
       ignore_errors: yes
 
     - name: Debug AWS ECR Login Output
