@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket         = "my-terraform-state-bucket"
+    bucket         = "househunt-terraform-state"
     key            = "househunt/terraform.tfstate"
     region         = "us-east-1"
     encrypt        = true
