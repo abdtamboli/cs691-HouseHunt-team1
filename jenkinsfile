@@ -89,6 +89,7 @@ pipeline {
                         export AWS_REGION=${AWS_REGION}
                         terraform init
                         terraform apply -auto-approve
+                        mkdir -p /var/jenkins_home/.ssh
                         cp jenkins-key.pem /var/jenkins_home/.ssh/jenkins-key.pem
                         chmod 600 /var/jenkins_home/.ssh/jenkins-key.pem
                         '''
