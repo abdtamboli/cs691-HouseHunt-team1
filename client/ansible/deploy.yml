@@ -16,37 +16,21 @@
           - docker.io
         state: present
 
-    - name: Check if AWS CLI is installed
-      command: aws --version
-      register: aws_cli_check
-      ignore_errors: yes
-
-    - name: Manually Install AWS CLI (if not installed)
-      shell: |
-        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
-        sudo ./aws/install
-      args:
-        creates: /usr/local/bin/aws
-      when: aws_cli_check.rc != 0
-
     - name: Start Docker service
       service:
         name: docker
         state: started
         enabled: yes
 
-    - name: Set AWS Credentials for ECR Login
+    - name: Authenticate AWS ECR as Ubuntu User
+      become: no  # Run this command as the Ubuntu user, not root
       shell: |
-        export AWS_ACCESS_KEY_ID=$(aws configure get aws_access_key_id)
-        export AWS_SECRET_ACCESS_KEY=$(aws configure get aws_secret_access_key)
-        export AWS_SESSION_TOKEN=$(aws configure get aws_session_token)
         aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
       register: ecr_login
       retries: 3
       delay: 5
       until: ecr_login.rc == 0
-      ignore_errors: yes
+      ignore_errors: no
 
     - name: Debug AWS ECR Login Output
       debug:
