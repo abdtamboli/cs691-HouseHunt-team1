@@ -31,14 +31,16 @@ pipeline {
 
         stage('Determine Docker Image Version') {
             steps {
-                script {
-                    def latest_version = sh(script: """
-                        aws ecr list-images --repository-name ${REPO_NAME} --region ${AWS_REGION} \
-                        --query 'imageIds[*].imageTag' --output text | sort -V | tail -n 1 || echo '1.0'
-                    """, returnStdout: true).trim()
-                    
-                    def new_version = latest_version.tokenize('.')[0] + '.' + (latest_version.tokenize('.')[1].toInteger() + 1)
-                    env.DOCKER_VERSION = new_version
+                withCredentials([aws(credentialsId: 'aws-credentials', region: AWS_REGION)]) {
+                    script {
+                        def latest_version = sh(script: """
+                            aws ecr list-images --repository-name ${REPO_NAME} --region ${AWS_REGION} \
+                            --query 'imageIds[*].imageTag' --output text | sort -V | tail -n 1 || echo '1.0'
+                        """, returnStdout: true).trim()
+
+                        def new_version = latest_version.tokenize('.')[0] + '.' + (latest_version.tokenize('.')[1].toInteger() + 1)
+                        env.DOCKER_VERSION = new_version
+                    }
                 }
             }
         }
@@ -79,11 +81,13 @@ pipeline {
 
         stage('Retrieve EC2 Public IP') {
             steps {
-                script {
-                    sh "cd client/terraform && terraform refresh"  // Ensure the latest state is pulled
+                withCredentials([aws(credentialsId: 'aws-credentials', region: AWS_REGION)]) {
+                    script {
+                        sh "cd client/terraform && terraform refresh"  // Ensure the latest state is pulled
 
-                    def ec2_public_ip = sh(script: "cd client/terraform && terraform output -raw public_ip", returnStdout: true).trim()
-                    env.EC2_PUBLIC_IP = ec2_public_ip
+                        def ec2_public_ip = sh(script: "cd client/terraform && terraform output -raw public_ip", returnStdout: true).trim()
+                        env.EC2_PUBLIC_IP = ec2_public_ip
+                    }
                 }
             }
         }
@@ -101,13 +105,15 @@ pipeline {
 
         stage('Deploy with Ansible') {
             steps {
-                script {
-                    def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${DOCKER_VERSION}"
+                withCredentials([aws(credentialsId: 'aws-credentials', region: AWS_REGION)]) {
+                    script {
+                        def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${DOCKER_VERSION}"
 
-                    sh """
-                    ansible-playbook -i client/ansible/inventory client/ansible/deploy.yml \
-                    --extra-vars "docker_image_version=${image_tag}"
-                    """
+                        sh """
+                        ansible-playbook -i client/ansible/inventory client/ansible/deploy.yml \
+                        --extra-vars "docker_image_version=${image_tag}"
+                        """
+                    }
                 }
             }
         }
