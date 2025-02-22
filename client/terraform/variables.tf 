@@ -1,0 +1,24 @@
+variable "aws_region" {
+  description = "AWS region"
+  default     = "us-east-1"
+}
+
+variable "instance_type" {
+  description = "Instance type"
+  default     = "t2.medium"
+}
+
+variable "key_name" {
+  description = "SSH key name"
+  default     = "jenkins-key"
+}
+
+variable "ami_id" {
+  description = "AMI ID for EC2"
+  default     = "ami-04b4f1a9cf54c11d0"
+}
+
+variable "security_group" {
+  description = "Security group for EC2"
+  default     = "allow-all"
+}

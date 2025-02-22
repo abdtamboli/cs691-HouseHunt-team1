@@ -1,0 +1,114 @@
+pipeline {
+    agent any
+    environment {
+        AWS_REGION = 'us-east-1'
+        AWS_ACCOUNT_ID = '063151788650'
+        REPO_NAME = 'househunt'
+        SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
+    }
+    stages {
+        stage('Checkout Repository') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Run NPM Tests (If Available)') {
+            steps {
+                script {
+                    sh """
+                    cd Client
+                    if [ -f package.json ] && grep -q '"test"' package.json; then
+                        npm install
+                        npm test
+                    else
+                        echo "No NPM tests found, skipping..."
+                    fi
+                    """
+                }
+            }
+        }
+
+        stage('Determine Docker Image Version') {
+            steps {
+                script {
+                    def latest_version = sh(script: """
+                        aws ecr list-images --repository-name ${REPO_NAME} --region ${AWS_REGION} \
+                        --query 'imageIds[*].imageTag' --output text | sort -V | tail -n 1 || echo '1.0'
+                    """, returnStdout: true).trim()
+                    
+                    def new_version = latest_version.tokenize('.')[0] + '.' + (latest_version.tokenize('.')[1].toInteger() + 1)
+                    env.DOCKER_VERSION = new_version
+                }
+            }
+        }
+
+        stage('Build and Push Docker Image') {
+            steps {
+                withCredentials([aws(credentialsId: 'aws-credentials', region: AWS_REGION)]) {
+                    script {
+                        def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${DOCKER_VERSION}"
+
+                        sh """
+                        docker build -t ${image_tag} .
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                        docker push ${image_tag}
+                        echo "${image_tag}" > $WORKSPACE/docker_image_version.txt
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Apply - Create EC2 Server') {
+            steps {
+                withCredentials([aws(credentialsId: 'aws-credentials', region: AWS_REGION)]) {
+                    script {
+                        sh '''
+                        cd Client/terraform
+                        terraform init
+                        terraform apply -auto-approve
+                        cp jenkins-key.pem /var/jenkins_home/.ssh/jenkins-key.pem
+                        chmod 600 /var/jenkins_home/.ssh/jenkins-key.pem
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Retrieve EC2 Public IP') {
+            steps {
+                script {
+                    sh "cd Client/terraform && terraform refresh"  // Ensure the latest state is pulled
+
+                    def ec2_public_ip = sh(script: "cd Client/terraform && terraform output -raw public_ip", returnStdout: true).trim()
+                    env.EC2_PUBLIC_IP = ec2_public_ip
+                }
+            }
+        }
+
+        stage('Update Ansible Inventory') {
+            steps {
+                script {
+                    sh """
+                    echo "[frontend]" > Client/ansible/inventory
+                    echo "${EC2_PUBLIC_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_PRIVATE_KEY_PATH}" >> Client/ansible/inventory
+                    """
+                }
+            }
+        }
+
+        stage('Deploy with Ansible') {
+            steps {
+                script {
+                    def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${DOCKER_VERSION}"
+
+                    sh """
+                    ansible-playbook -i Client/ansible/inventory Client/ansible/deploy.yml \
+                    --extra-vars "docker_image_version=${image_tag}"
+                    """
+                }
+            }
+        }
+    }
+}

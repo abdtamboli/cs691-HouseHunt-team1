@@ -1,0 +1,43 @@
+- name: Configure EC2 Deployment Server
+  hosts: frontend
+  become: yes
+  tasks:
+    - name: Update and upgrade packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install required packages
+      apt:
+        name: 
+          - docker.io
+          - awscli
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Authenticate AWS ECR
+      shell: |
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
+
+    - name: Get the latest Docker image version from Jenkins
+      shell: cat /var/jenkins_home/workspace/docker_image_version.txt
+      register: docker_image
+
+    - name: Stop and remove existing container (if running)
+      shell: |
+        docker stop househunt || true
+        docker rm househunt || true
+      ignore_errors: yes
+
+    - name: Pull the latest Docker image from AWS ECR
+      shell: |
+        docker pull {{ docker_image.stdout }}
+
+    - name: Run the Docker container
+      shell: |
+        docker run -d --name househunt -p 80:80 {{ docker_image.stdout }}
