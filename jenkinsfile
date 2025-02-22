@@ -4,6 +4,7 @@ pipeline {
         AWS_REGION = 'us-east-1'
         AWS_ACCOUNT_ID = '211125590005'
         REPO_NAME = 'househunt'
+        IMAGE_TAG = 'latest'
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
     }
     stages {
@@ -29,43 +30,11 @@ pipeline {
             }
         }
 
-        stage('Determine Docker Image Version') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    script {
-                        sh "export AWS_REGION=${AWS_REGION}"
-                        
-                        def latest_version = sh(script: """
-                            aws ecr list-images --repository-name ${REPO_NAME} --query 'imageIds[*].imageTag' --output text | sort -V | tail -n 1 || echo '1.0'
-                        """, returnStdout: true).trim()
-
-                        // Ensure latest_version is not null
-                        if (!latest_version?.trim()) {
-                            latest_version = "1.0"
-                        }
-
-                        // Handle cases where there's only one version
-                        def version_parts = latest_version.tokenize('.')
-                        def new_version
-
-                        if (version_parts.size() == 2) {
-                            new_version = version_parts[0] + '.' + (version_parts[1].toInteger() + 1)
-                        } else {
-                            new_version = "1.1"
-                        }
-
-                        env.DOCKER_VERSION = new_version
-                        echo "New Docker Image Version: ${env.DOCKER_VERSION}"
-                    }
-                }
-            }
-        }
-
         stage('Build and Push Docker Image') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     script {
-                        def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${env.DOCKER_VERSION}"
+                        def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}"
 
                         sh """
                         cd client
@@ -73,7 +42,6 @@ pipeline {
                         docker build -t ${image_tag} .
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                         docker push ${image_tag}
-                        echo "${image_tag}" > $WORKSPACE/docker_image_version.txt
                         """
                     }
                 }
@@ -127,13 +95,11 @@ pipeline {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     script {
-                        def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${env.DOCKER_VERSION}"
-
                         sh """
                         export ANSIBLE_HOST_KEY_CHECKING=False
                         ssh-keyscan -H ${EC2_PUBLIC_IP} >> /var/jenkins_home/.ssh/known_hosts
-                         ansible-playbook -i client/ansible/inventory client/ansible/deploy.yml \
-                        --extra-vars "docker_image_version=${image_tag}"
+                        ansible-playbook -i client/ansible/inventory client/ansible/deploy.yml \
+                        --extra-vars "docker_image_version=latest"
                         """
                     }
                 }
