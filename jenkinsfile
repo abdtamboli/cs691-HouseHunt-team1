@@ -17,7 +17,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                    cd Client
+                    cd client
                     if [ -f package.json ] && grep -q '"test"' package.json; then
                         npm install
                         npm test
@@ -50,6 +50,7 @@ pipeline {
                         def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${DOCKER_VERSION}"
 
                         sh """
+                        cd client
                         docker build -t ${image_tag} .
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
                         docker push ${image_tag}
@@ -65,7 +66,7 @@ pipeline {
                 withCredentials([aws(credentialsId: 'aws-credentials', region: AWS_REGION)]) {
                     script {
                         sh '''
-                        cd Client/terraform
+                        cd client/terraform
                         terraform init
                         terraform apply -auto-approve
                         cp jenkins-key.pem /var/jenkins_home/.ssh/jenkins-key.pem
@@ -79,9 +80,9 @@ pipeline {
         stage('Retrieve EC2 Public IP') {
             steps {
                 script {
-                    sh "cd Client/terraform && terraform refresh"  // Ensure the latest state is pulled
+                    sh "cd client/terraform && terraform refresh"  // Ensure the latest state is pulled
 
-                    def ec2_public_ip = sh(script: "cd Client/terraform && terraform output -raw public_ip", returnStdout: true).trim()
+                    def ec2_public_ip = sh(script: "cd client/terraform && terraform output -raw public_ip", returnStdout: true).trim()
                     env.EC2_PUBLIC_IP = ec2_public_ip
                 }
             }
@@ -91,8 +92,8 @@ pipeline {
             steps {
                 script {
                     sh """
-                    echo "[frontend]" > Client/ansible/inventory
-                    echo "${EC2_PUBLIC_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_PRIVATE_KEY_PATH}" >> Client/ansible/inventory
+                    echo "[frontend]" > client/ansible/inventory
+                    echo "${EC2_PUBLIC_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_PRIVATE_KEY_PATH}" >> client/ansible/inventory
                     """
                 }
             }
@@ -104,7 +105,7 @@ pipeline {
                     def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${DOCKER_VERSION}"
 
                     sh """
-                    ansible-playbook -i Client/ansible/inventory Client/ansible/deploy.yml \
+                    ansible-playbook -i client/ansible/inventory client/ansible/deploy.yml \
                     --extra-vars "docker_image_version=${image_tag}"
                     """
                 }
