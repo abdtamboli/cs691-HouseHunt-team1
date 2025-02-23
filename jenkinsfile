@@ -106,4 +106,26 @@ pipeline {
             }
         }
     }
+
+    post {
+        success {
+            script {
+                emailext subject: "Jenkins Build SUCCESS: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                         body: "SUCCESS: Jenkins pipeline ${env.JOB_NAME} has completed successfully.\n\n" +
+                               "Build Number: ${env.BUILD_NUMBER}\n" +
+                               "Job URL: ${env.BUILD_URL}",
+                         to: "abd7tamboli@gmail.com" 
+            }
+        }
+        failure {
+            script {
+                emailext subject: "Jenkins Build FAILURE: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                         body: "FAILURE: Jenkins pipeline ${env.JOB_NAME} has failed.\n\n" +
+                               "Build Number: ${env.BUILD_NUMBER}\n" +
+                               "Job URL: ${env.BUILD_URL}\n\n" +
+                               "Please check the logs for details.",
+                         to: "abd7tamboli@gmail.com" 
+            }
+        }
+    }
 }
