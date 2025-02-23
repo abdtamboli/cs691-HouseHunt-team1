@@ -40,7 +40,7 @@
       shell: |
         export AWS_SHARED_CREDENTIALS_FILE=/home/ubuntu/.aws/credentials
         export AWS_CONFIG_FILE=/home/ubuntu/.aws/config
-        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 211125590005.dkr.ecr.us-east-1.amazonaws.com
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 314146332315.dkr.ecr.us-east-1.amazonaws.com
       register: ecr_login
       retries: 3
       delay: 5
