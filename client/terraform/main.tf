@@ -51,7 +51,7 @@ resource "aws_security_group" "allow_all" {
 # ✅ Fix: Use `aws_security_group.allow_all.name` Instead of `var.security_group`
 resource "aws_instance" "frontend_server" {
   ami             = "ami-04b4f1a9cf54c11d0"  # Directly specifying AMI ID
-  instance_type   = "t2.medium"  # Directly specifying instance type
+  instance_type   = "t2.micro"  # Directly specifying instance type
   key_name        = aws_key_pair.generated_key.key_name
   security_groups = [aws_security_group.allow_all.name]
 

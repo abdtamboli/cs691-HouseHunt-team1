@@ -2,7 +2,7 @@ pipeline {
     agent any
     environment {
         AWS_REGION = 'us-east-1'
-        AWS_ACCOUNT_ID = '211125590005'
+        AWS_ACCOUNT_ID = '314146332315'
         REPO_NAME = 'househunt'
         IMAGE_TAG = 'latest'
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
