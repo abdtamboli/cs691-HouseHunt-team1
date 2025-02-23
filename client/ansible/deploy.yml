@@ -58,8 +58,8 @@
 
     - name: Pull the latest Docker image from AWS ECR
       shell: |
-        docker pull 211125590005.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
+        docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
 
     - name: Run the Docker container
       shell: |
-        docker run -d --name househunt -p 80:80 211125590005.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
+        docker run -d --name househunt -p 80:80 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
