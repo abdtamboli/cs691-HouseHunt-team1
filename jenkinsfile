@@ -7,7 +7,7 @@ pipeline {
         IMAGE_TAG = 'latest'
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
         SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
-        // EC2_PUBLIC_IP = "YOUR_SERVER_IP_HERE"  // ✅ Hardcoded IP
+        EC2_PUBLIC_IP = "35.175.179.243"  
     }
     stages {
         stage('Checkout Repository') {
@@ -50,7 +50,7 @@ pipeline {
             }
         }
 
-        /* stage('Update Ansible Inventory') {
+        stage('Update Ansible Inventory') {
             steps {
                 script {
                     sh """
@@ -74,10 +74,10 @@ pipeline {
                     }
                 }
             }
-        }*/
+        }
     }
 
-    /* ✅ Slack Notifications
+    ✅ Slack Notifications
     post {
         success {
             script {
@@ -97,5 +97,5 @@ pipeline {
                 """
             }
         }
-    }*/
+    }
 }
