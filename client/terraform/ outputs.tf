@@ -1,6 +1,11 @@
-output "public_ip" {
-  description = "Public IP of the EC2 instance"
-  value       = aws_instance.frontend_server.public_ip
+output "dev_server_public_ip" {
+  description = "Public IP of the Dev server"
+  value       = aws_instance.dev_server.public_ip
+}
+
+output "qa_server_public_ip" {
+  description = "Public IP of the QA server"
+  value       = aws_instance.qa_server.public_ip
 }
 
 output "private_key_pem" {
