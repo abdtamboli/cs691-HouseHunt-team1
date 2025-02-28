@@ -6,7 +6,8 @@ pipeline {
         REPO_NAME = 'househunt'
         IMAGE_TAG = 'latest'
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
-        SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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" 
+        SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
+        // EC2_PUBLIC_IP = "YOUR_SERVER_IP_HERE"  // ✅ Hardcoded IP
     }
     stages {
         stage('Checkout Repository') {
@@ -49,39 +50,7 @@ pipeline {
             }
         }
 
-        stage('Terraform Apply - Create EC2 Server') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    script {
-                        sh '''
-                        cd client/terraform
-                        export AWS_REGION=${AWS_REGION}
-                        terraform init
-                        terraform apply -auto-approve
-                        mkdir -p /var/jenkins_home/.ssh
-                        cp jenkins-key.pem /var/jenkins_home/.ssh/jenkins-key.pem
-                        chmod 600 /var/jenkins_home/.ssh/jenkins-key.pem
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Retrieve EC2 Public IP') {
-            steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    script {
-                        sh "cd client/terraform && terraform refresh"
-
-                        def ec2_public_ip = sh(script: "cd client/terraform && terraform output -raw public_ip", returnStdout: true).trim()
-                        env.EC2_PUBLIC_IP = ec2_public_ip
-                        echo "EC2 Public IP: ${env.EC2_PUBLIC_IP}"
-                    }
-                }
-            }
-        }
-
-        stage('Update Ansible Inventory') {
+        /* stage('Update Ansible Inventory') {
             steps {
                 script {
                     sh """
@@ -90,7 +59,7 @@ pipeline {
                     """
                 }
             }
-        }
+        } 
 
         stage('Deploy with Ansible') {
             steps {
@@ -105,7 +74,7 @@ pipeline {
                     }
                 }
             }
-        }
+        }*/
     }
 
     // ✅ Slack Notifications
