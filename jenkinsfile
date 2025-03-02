@@ -21,7 +21,7 @@ pipeline {
                 script {
                     if (params.DEPLOY_ENV == 'DEV') {
                         env.EC2_PUBLIC_IP = env.DEV_SERVER_IP
-                    } else if (params.DEPLOY_ENV == 'PROD') {
+                    } else if (params.DEPLOY_ENV == 'QA') {
                         env.EC2_PUBLIC_IP = env.QA_SERVER_IP
                     } else {
                         error "Invalid environment selected!"
