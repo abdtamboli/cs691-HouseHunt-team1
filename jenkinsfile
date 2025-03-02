@@ -1,7 +1,7 @@
 pipeline {
     agent any
     parameters {
-        choice(name: 'DEPLOY_ENV', choices: ['DEV', 'PROD'], description: 'Select the environment to deploy')
+        choice(name: 'DEPLOY_ENV', choices: ['DEV', 'QA'], description: 'Select the environment to deploy')
     }
     environment {
         AWS_REGION = 'us-east-1'
@@ -13,7 +13,7 @@ pipeline {
         
         // Define IPs for both environments
         DEV_SERVER_IP = "35.175.179.243"
-        PROD_SERVER_IP = "54.210.90.101"
+        QA_SERVER_IP = "54.226.164.106"
     }
     stages {
         stage('Determine Target Server') {
@@ -22,7 +22,7 @@ pipeline {
                     if (params.DEPLOY_ENV == 'DEV') {
                         env.EC2_PUBLIC_IP = env.DEV_SERVER_IP
                     } else if (params.DEPLOY_ENV == 'PROD') {
-                        env.EC2_PUBLIC_IP = env.PROD_SERVER_IP
+                        env.EC2_PUBLIC_IP = env.QA_SERVER_IP
                     } else {
                         error "Invalid environment selected!"
                     }
