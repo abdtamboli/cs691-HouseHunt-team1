@@ -98,7 +98,7 @@ pipeline {
         }
     }
 
-    /*//✅ Slack Notifications
+    //✅ Slack Notifications
     post {
         success {
             script {
@@ -118,5 +118,5 @@ pipeline {
                 """
             }
         }
-    }*/
+    }
 }
