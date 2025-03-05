@@ -51,7 +51,7 @@ resource "aws_security_group" "allow_all" {
 # ✅ Create EC2 Instance for Dev Server
 resource "aws_instance" "dev_server" {
   ami             = "ami-04b4f1a9cf54c11d0"  # Directly specifying AMI ID
-  instance_type   = "t2.medium"  # Free-tier eligible
+  instance_type   = "t2.micro"  # Free-tier eligible
   key_name        = aws_key_pair.generated_key.key_name
   security_groups = [aws_security_group.allow_all.name]
 
@@ -64,7 +64,7 @@ resource "aws_instance" "dev_server" {
 # ✅ Create EC2 Instance for QA Server
 resource "aws_instance" "qa_server" {
   ami             = "ami-04b4f1a9cf54c11d0"  # Directly specifying AMI ID
-  instance_type   = "t2.medium"  # Free-tier eligible
+  instance_type   = "t2.micro"  # Free-tier eligible
   key_name        = aws_key_pair.generated_key.key_name
   security_groups = [aws_security_group.allow_all.name]
 
