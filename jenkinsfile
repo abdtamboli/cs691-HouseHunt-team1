@@ -12,8 +12,8 @@ pipeline {
         SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
         
         // Define IPs for both environments
-        DEV_SERVER_IP = "35.175.179.243"
-        QA_SERVER_IP = "54.226.164.106"
+        DEV_SERVER_IP = "44.212.29.69"
+        QA_SERVER_IP = "34.203.216.166"
     }
     stages {
         stage('Determine Target Server') {
