@@ -50,16 +50,34 @@
       debug:
         msg: "{{ ecr_login.stdout }}"
 
-    - name: Stop and remove existing container (if running)
+    # ✅ Stop and remove existing containers (client + API)
+    - name: Stop and remove existing client container
       shell: |
         docker stop househunt || true
         docker rm househunt || true
       ignore_errors: yes
 
-    - name: Pull the latest Docker image from AWS ECR
+    - name: Stop and remove existing API container
       shell: |
-        docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
+        docker stop househunt-api || true
+        docker rm househunt-api || true
+      ignore_errors: yes
 
-    - name: Run the Docker container
+    # ✅ Pull both latest images
+    - name: Pull latest client Docker image from AWS ECR
       shell: |
-        docker run -d --name househunt -p 80:80 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
+        docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-client:latest
+
+    - name: Pull latest API Docker image from AWS ECR
+      shell: |
+        docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-api:latest
+
+    # ✅ Run client container
+    - name: Run client container
+      shell: |
+        docker run -d --name househunt -p 80:80 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-client:latest
+
+    # ✅ Run API container with port 8800
+    - name: Run API container
+      shell: |
+        docker run -d --name househunt-api -p 8800:8800 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-api:latest

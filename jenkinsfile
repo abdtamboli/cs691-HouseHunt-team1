@@ -6,15 +6,16 @@ pipeline {
     environment {
         AWS_REGION = 'us-east-1'
         AWS_ACCOUNT_ID = '314146332315'
-        REPO_NAME = 'househunt'
+        CLIENT_REPO = 'househunt-client'
+        API_REPO = 'househunt-api'
         IMAGE_TAG = 'latest'
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
         SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
         
-        // Define IPs for both environments
         DEV_SERVER_IP = "44.212.29.69"
-        QA_SERVER_IP = "34.203.216.166"
+        QA_SERVER_IP  = "34.203.216.166"
     }
+
     stages {
         stage('Determine Target Server') {
             steps {
@@ -26,7 +27,7 @@ pipeline {
                     } else {
                         error "Invalid environment selected!"
                     }
-                    echo "Deploying to ${params.DEPLOY_ENV} environment - Server: ${env.EC2_PUBLIC_IP}"
+                    echo "Deploying to ${params.DEPLOY_ENV} - Server: ${env.EC2_PUBLIC_IP}"
                 }
             }
         }
@@ -53,18 +54,41 @@ pipeline {
             }
         }
 
-        stage('Build and Push Docker Image') {
+        stage('Build and Push Client Docker Image') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     script {
-                        def image_tag = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${REPO_NAME}:${IMAGE_TAG}"
+                        def client_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${CLIENT_REPO}:${IMAGE_TAG}"
 
                         sh """
                         cd client
-                        export AWS_REGION=${AWS_REGION}
-                        docker build -t ${image_tag} .
+                        docker build -t ${client_image} .
                         aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                        docker push ${image_tag}
+                        docker push ${client_image}
+                        """
+                    }
+                }
+            }
+        }
+
+        stage('Build and Push API Docker Image') {
+            steps {
+                withCredentials([
+                    file(credentialsId: 'api-env-file', variable: 'ENV_FILE'),
+                    [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']
+                ]) {
+                    script {
+                        def api_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${API_REPO}:${IMAGE_TAG}"
+
+                        sh """
+                        cd api
+                        cp $ENV_FILE .env
+                        # Replace CLIENT_URL with the correct EC2 IP dynamically
+                        sed -i 's|CLIENT_URL=.*|CLIENT_URL=http://${EC2_PUBLIC_IP}|' .env
+
+                        docker build -t ${api_image} .
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                        docker push ${api_image}
                         """
                     }
                 }
@@ -75,12 +99,12 @@ pipeline {
             steps {
                 script {
                     sh """
-                    echo "[frontend]" > client/ansible/inventory
-                    echo "${EC2_PUBLIC_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_PRIVATE_KEY_PATH}" >> client/ansible/inventory
+                    echo "[frontend]" > ansible/inventory
+                    echo "${EC2_PUBLIC_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_PRIVATE_KEY_PATH}" >> ansible/inventory
                     """
                 }
             }
-        } 
+        }
 
         stage('Deploy with Ansible') {
             steps {
@@ -89,7 +113,7 @@ pipeline {
                         sh """
                         export ANSIBLE_HOST_KEY_CHECKING=False
                         ssh-keyscan -H ${EC2_PUBLIC_IP} >> /var/jenkins_home/.ssh/known_hosts
-                        ansible-playbook -i client/ansible/inventory client/ansible/deploy.yml \
+                        ansible-playbook -i ansible/inventory ansible/deploy.yml \
                         --extra-vars "docker_image_version=latest"
                         """
                     }
@@ -97,8 +121,7 @@ pipeline {
             }
         }
     }
-
-    //✅ Slack Notifications
+/*
     post {
         success {
             script {
@@ -119,4 +142,4 @@ pipeline {
             }
         }
     }
-}
+} */
