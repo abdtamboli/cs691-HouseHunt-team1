@@ -6,7 +6,7 @@ pipeline {
     environment {
         AWS_REGION = 'us-east-1'
         AWS_ACCOUNT_ID = '314146332315'
-        CLIENT_REPO = 'househunt-client'
+        CLIENT_REPO = 'househunt'
         API_REPO = 'househunt-api'
         IMAGE_TAG = 'latest'
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
