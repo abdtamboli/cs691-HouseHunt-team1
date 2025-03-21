@@ -66,7 +66,7 @@
     # ✅ Pull both latest images
     - name: Pull latest client Docker image from AWS ECR
       shell: |
-        docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-client:latest
+        docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
 
     - name: Pull latest API Docker image from AWS ECR
       shell: |
@@ -75,7 +75,7 @@
     # ✅ Run client container
     - name: Run client container
       shell: |
-        docker run -d --name househunt -p 80:80 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-client:latest
+        docker run -d --name househunt -p 80:80 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
 
     # ✅ Run API container with port 8800
     - name: Run API container
