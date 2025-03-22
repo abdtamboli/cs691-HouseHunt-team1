@@ -8,6 +8,7 @@ pipeline {
         AWS_ACCOUNT_ID = '314146332315'
         CLIENT_REPO = 'househunt'
         API_REPO = 'househunt-api'
+        SOCKET_REPO = 'socket-service'
         IMAGE_TAG = 'latest'
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
         SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
@@ -96,6 +97,23 @@ pipeline {
             }
         }
 
+        stage('Build and Push Socket Docker Image') {
+            steps {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                    script {
+                        def socket_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SOCKET_REPO}:${IMAGE_TAG}"
+
+                        sh """
+                        cd socket
+                        docker build -t ${socket_image} .
+                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                        docker push ${socket_image}
+                        """
+                    }
+                }
+            }
+        }
+
         stage('Update Ansible Inventory') {
             steps {
                 script {
@@ -123,7 +141,8 @@ pipeline {
         }
     }
 
-   /* post {
+    /* Uncomment when Slack notifications are ready
+    post {
         success {
             script {
                 sh """
@@ -142,5 +161,6 @@ pipeline {
                 """
             }
         }
-    }*/
+    }
+    */
 }
