@@ -38,4 +38,4 @@ io.on("connection", (socket) => {
   });
 });
 
-io.listen(4000, '0.0.0.0');
+io.listen("4000");
