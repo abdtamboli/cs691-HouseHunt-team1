@@ -1,38 +1,26 @@
 pipeline {
     agent any
-    parameters {
-        choice(name: 'DEPLOY_ENV', choices: ['DEV', 'QA'], description: 'Select the environment to deploy')
-    }
+
     environment {
         AWS_REGION = 'us-east-1'
         AWS_ACCOUNT_ID = '314146332315'
+
+        // Repositories
         CLIENT_REPO = 'househunt'
         API_REPO = 'househunt-api'
         SOCKET_REPO = 'socket-service'
+
         IMAGE_TAG = 'latest'
+
+        // Target EC2 (Dev) server IP
+        EC2_PUBLIC_IP = "44.212.29.69"
+
+        // Secrets and paths
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
         SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
-
-        DEV_SERVER_IP = "44.212.29.69"
-        QA_SERVER_IP  = "34.203.216.166"
     }
 
     stages {
-        stage('Determine Target Server') {
-            steps {
-                script {
-                    if (params.DEPLOY_ENV == 'DEV') {
-                        env.EC2_PUBLIC_IP = env.DEV_SERVER_IP
-                    } else if (params.DEPLOY_ENV == 'QA') {
-                        env.EC2_PUBLIC_IP = env.QA_SERVER_IP
-                    } else {
-                        error "Invalid environment selected!"
-                    }
-                    echo "Deploying to ${params.DEPLOY_ENV} - Server: ${env.EC2_PUBLIC_IP}"
-                }
-            }
-        }
-
         stage('Checkout Repository') {
             steps {
                 checkout scm
@@ -83,8 +71,6 @@ pipeline {
 
                         sh """
                         cd api
-
-                        # Workaround to safely handle .env permissions
                         cat \$ENV_FILE | sed 's|CLIENT_URL=.*|CLIENT_URL=http://${EC2_PUBLIC_IP}|' > temp_env
                         mv temp_env .env
 
@@ -141,13 +127,12 @@ pipeline {
         }
     }
 
-    /* Uncomment when Slack notifications are ready
-    post {
+   /* post {
         success {
             script {
                 sh """
                 curl -X POST -H 'Content-type: application/json' --data '{
-                    "text": "✅ *Build SUCCESS* 🚀\\n*Environment:* ${params.DEPLOY_ENV} \\n*Job:* ${JOB_NAME} \\n*Build Number:* ${BUILD_NUMBER} \\n*Status:* SUCCESS ✅\\n*Server:* http://${EC2_PUBLIC_IP}/"
+                    "text": "✅ *Build SUCCESS* 🚀\\n*Branch:* ${GIT_BRANCH} \\n*Job:* ${JOB_NAME} \\n*Build Number:* ${BUILD_NUMBER} \\n*Server:* http://${EC2_PUBLIC_IP}/"
                 }' ${SLACK_WEBHOOK_URL}
                 """
             }
@@ -156,11 +141,10 @@ pipeline {
             script {
                 sh """
                 curl -X POST -H 'Content-type: application/json' --data '{
-                    "text": "❌ *Build FAILED* ❗\\n*Environment:* ${params.DEPLOY_ENV} \\n*Job:* ${JOB_NAME} \\n*Build Number:* ${BUILD_NUMBER} \\n*Status:* FAILED ❌\\nCheck Jenkins Logs for more details."
+                    "text": "❌ *Build FAILED* ❗\\n*Branch:* ${GIT_BRANCH} \\n*Job:* ${JOB_NAME} \\n*Build Number:* ${BUILD_NUMBER} \\nCheck Jenkins Logs for more details."
                 }' ${SLACK_WEBHOOK_URL}
                 """
             }
         }
-    }
-    */
+    }*/
 }
