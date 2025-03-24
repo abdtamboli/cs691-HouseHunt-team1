@@ -56,7 +56,7 @@ resource "aws_instance" "dev_server" {
   security_groups = [aws_security_group.allow_all.name]
 
   tags = {
-    Name = "Dev-HouseHunt-team1"
+    Name = "Dev-HouseHunt"
     Environment = "Development"
   }
 }
@@ -69,7 +69,7 @@ resource "aws_instance" "qa_server" {
   security_groups = [aws_security_group.allow_all.name]
 
   tags = {
-    Name = "QA-HouseHunt-team1"
+    Name = "QA-HouseHunt"
     Environment = "QA"
   }
 }
