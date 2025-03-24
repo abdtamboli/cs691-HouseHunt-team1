@@ -36,6 +36,9 @@
         state: started
         enabled: yes
 
+    - name: Create custom Docker network
+      shell: docker network create househunt-network || true
+
     - name: Set AWS Credentials for ECR Login
       shell: |
         export AWS_SHARED_CREDENTIALS_FILE=/home/ubuntu/.aws/credentials
@@ -50,7 +53,6 @@
       debug:
         msg: "{{ ecr_login.stdout }}"
 
-    # ✅ Stop and remove existing containers
     - name: Stop and remove existing client container
       shell: |
         docker stop househunt || true
@@ -69,7 +71,6 @@
         docker rm socket-server || true
       ignore_errors: yes
 
-    # ✅ Pull latest images from ECR
     - name: Pull latest client Docker image from AWS ECR
       shell: |
         docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
@@ -82,15 +83,23 @@
       shell: |
         docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/socket-service:latest
 
-    # ✅ Run containers
     - name: Run client container
       shell: |
-        docker run -d --name househunt -p 80:80 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
+        docker run -d --name househunt \
+        --network househunt-network \
+        -p 80:80 \
+        314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt:latest
 
     - name: Run API container
       shell: |
-        docker run -d --name househunt-api -p 8800:8800 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-api:latest
+        docker run -d --name househunt-api \
+        --network househunt-network \
+        -p 8800:8800 \
+        314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-api:latest
 
     - name: Run Socket.IO container
       shell: |
-        docker run -d --name socket-server -p 4000:4000 314146332315.dkr.ecr.us-east-1.amazonaws.com/socket-service:latest
+        docker run -d --name socket-server \
+        --network househunt-network \
+        -p 4000:4000 \
+        314146332315.dkr.ecr.us-east-1.amazonaws.com/socket-service:latest
