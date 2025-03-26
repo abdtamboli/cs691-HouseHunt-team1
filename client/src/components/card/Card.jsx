@@ -1,7 +1,30 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./card.scss";
+import apiRequest from "../../lib/apiRequest";
 
-function Card({ item }) {
+function Card({ item, editable }) {
+  const navigate = useNavigate();
+
+  const handleUpdate = () => {
+    navigate(`/update/${item.id}`);
+  };
+
+  const handleDelete = async () => {
+    try {
+      const res = await apiRequest.delete(`/posts/${item.id}`);
+      console.log("Delete success:", res.data.message);
+      window.location.reload();
+    } catch (error) {
+      if (error.response) {
+        console.error("Error deleting post:", error.response.data.message);
+        alert("Error deleting post: " + error.response.data.message);
+      } else {
+        console.error("Error deleting post:", error);
+        alert("Error deleting post");
+      }
+    }
+  };
+
   return (
     <div className="card">
       <Link to={`/${item.id}`} className="imageContainer">
@@ -36,6 +59,13 @@ function Card({ item }) {
             </div>
           </div>
         </div>
+        {/* Only show these buttons when editable is true */}
+        {editable && (
+          <div className="postActions">
+            <button onClick={handleUpdate}>Update Post</button>
+            <button onClick={handleDelete}>Delete Post</button>
+          </div>
+        )}
       </div>
     </div>
   );

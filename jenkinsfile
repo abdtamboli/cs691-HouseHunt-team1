@@ -13,7 +13,7 @@ pipeline {
         IMAGE_TAG = 'latest'
 
         // Target EC2 (Dev) server IP
-        EC2_PUBLIC_IP = "3.80.67.101"
+        EC2_PUBLIC_IP = "54.226.189.19"
 
         // Secrets and paths
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"

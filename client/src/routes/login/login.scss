@@ -13,6 +13,16 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      width: 50%;  // Ensures form takes full width of container
+
+      label {
+        font-size: 16px;  // You can adjust font size here
+        font-weight: bold;
+
+        .required {
+          color: #eb7100;  // Set the star color here
+        }
+      }
 
       input{
         padding: 20px;
@@ -24,13 +34,13 @@
         padding: 20px;
         border-radius: 5px;
         border: none;
-        background-color: teal;
+        background-color: #eb7100;
         color: white;
         font-weight: bold;
         cursor: pointer;
 
         &:disabled{
-          background-color: #BED9D8;
+          background-color: #fbe2c7;
           cursor: not-allowed;
         }
       }
@@ -50,7 +60,7 @@
 
   .imgContainer {
     flex: 2;
-    background-color: #fcf5f3;
+    background-color: #fbe2c7;
     display: flex;
     align-items: center;
     justify-content: center;

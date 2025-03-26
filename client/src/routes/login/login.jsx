@@ -8,7 +8,7 @@ function Login() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const {updateUser} = useContext(AuthContext)
+  const { updateUser } = useContext(AuthContext)
 
   const navigate = useNavigate();
 
@@ -41,6 +41,9 @@ function Login() {
       <div className="formContainer">
         <form onSubmit={handleSubmit}>
           <h1>Welcome back</h1>
+          <label htmlFor="username">
+            Username <span className="required">*</span>
+          </label>
           <input
             name="username"
             required
@@ -49,6 +52,9 @@ function Login() {
             type="text"
             placeholder="Username"
           />
+          <label htmlFor="password">
+            Password <span className="required">*</span>
+          </label>
           <input
             name="password"
             type="password"

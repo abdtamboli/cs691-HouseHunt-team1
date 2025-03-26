@@ -13,7 +13,7 @@
       text-transform: capitalize;
 
       &.active {
-        background-color: black;
+        background-color: #eb7100;
         color: white;
       }
 
@@ -34,6 +34,7 @@
     justify-content: space-between;
     height: 64px;
     gap: 5px;
+    border-radius: 0 6px 6px 6px;
 
     @include sm {
       flex-direction: column;
@@ -44,6 +45,7 @@
       border: none;
       padding: 0px 10px;
       width: 200px;
+      border-radius: 0 0 0 5px;
 
       @include lg {
         padding: 0px 5px;
@@ -74,15 +76,16 @@
 
     a{
       flex: 1;
-      background-color: #fece51;
+      background-color: #eb7100;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 0 5px 5px 0;
 
       button {
         border: none;
         cursor: pointer;
-        background-color: #fece51;
+        background-color: #eb7100;
         
         @include sm{
           padding: 10px;

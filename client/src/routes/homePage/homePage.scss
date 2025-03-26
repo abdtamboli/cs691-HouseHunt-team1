@@ -61,23 +61,34 @@
 
   .imgContainer {
     flex: 2;
-    background-color: #EBE8FC;
-    position: relative;
+    background-color: #fbe2c7;
     display: flex;
     align-items: center;
-
-    @include md {
-      display: none;
-    }
-
+    justify-content: center;
     img {
-      width: 115%;
-      position: absolute;
-      right: 0;
-
-      @include lg {
-        width: 105%;
-      }
+      width: 100%;
     }
   }
+
+  // .imgContainer {
+  //   flex: 2;
+  //   background-color: #EBE8FC;
+  //   position: relative;
+  //   display: flex;
+  //   align-items: center;
+
+  //   @include md {
+  //     display: none;
+  //   }
+
+  //   img {
+  //     width: 115%;
+  //     position: absolute;
+  //     right: 0;
+
+  //     @include lg {
+  //       width: 105%;
+  //     }
+  //   }
+  // }
 }

@@ -56,7 +56,9 @@ function ProfilePage() {
               resolve={data.postResponse}
               errorElement={<p>Error loading posts!</p>}
             >
-              {(postResponse) => <List posts={postResponse.data.userPosts} />}
+              {(postResponse) => (
+                <List posts={postResponse.data.userPosts} editable={true} />
+              )}
             </Await>
           </Suspense>
           <div className="title">

@@ -1,3 +1,76 @@
+// .newPostPage {
+//   height: 100%;
+//   display: flex;
+
+//   .formContainer {
+//     flex: 3;
+//     overflow: scroll;
+
+//     .wrapper {
+//       margin: 30px 50px 100px 0px;
+
+//       form {
+//         display: flex;
+//         justify-content: space-between;
+//         flex-wrap: wrap;
+//         gap: 20px;
+
+//         .item {
+//           width: 30%;
+//           display: flex;
+//           flex-direction: column;
+//           gap: 5px;
+
+//           input {
+//             padding: 20px;
+//             border-radius: 5px;
+//             border: 1px solid gray;
+//           }
+
+//           select {
+//             padding: 19px;
+//           }
+
+//           &.description {
+//             width: 100%;
+//             height: 320px;
+
+//             .quill > .ql-container > .ql-editor{
+//               height: 200px;
+//               font-size: 16px;
+//             }
+//           }
+//         }
+//         .sendButton {
+//           width: 30%;
+//           border-radius: 5px;
+//           border: none;
+//           background-color: #eb7100;
+//           color: white;
+//           font-weight: bold;
+//           cursor: pointer;
+//         }
+//       }
+//     }
+//   }
+
+//   .sideContainer {
+//     flex: 2;
+//     background-color: #fbe2c7;
+//     display: flex;
+//     flex-direction: column;
+//     gap: 20px;
+//     align-items: center;
+//     justify-content: center;
+
+//     img {
+//       width: 50%;
+//       height: 180px;
+//       object-fit: cover;
+//       border-radius: 5px;
+//     }
+//   }
+// }
 .newPostPage {
   height: 100%;
   display: flex;
@@ -21,9 +94,6 @@
           flex-direction: column;
           gap: 5px;
 
-          label {
-          }
-
           input {
             padding: 20px;
             border-radius: 5px;
@@ -38,7 +108,7 @@
             width: 100%;
             height: 320px;
 
-            .quill > .ql-container > .ql-editor{
+            .quill > .ql-container > .ql-editor {
               height: 200px;
               font-size: 16px;
             }
@@ -48,7 +118,7 @@
           width: 30%;
           border-radius: 5px;
           border: none;
-          background-color: teal;
+          background-color: #eb7100;
           color: white;
           font-weight: bold;
           cursor: pointer;
@@ -59,18 +129,44 @@
 
   .sideContainer {
     flex: 2;
-    background-color: #fcf5f3;
+    background-color: #fbe2c7;
     display: flex;
     flex-direction: column;
     gap: 20px;
     align-items: center;
     justify-content: center;
 
-    img {
-      width: 50%;
-      height: 180px;
-      object-fit: cover;
-      border-radius: 5px;
+    .imageWrapper {
+      position: relative;
+      
+      img {
+        width: 100%;
+        // height: 180px;
+        object-fit: cover;
+        border-radius: 5px;
+      }
+
+      .deleteButton {
+        position: absolute;
+        // top: 10px;
+        // right: 10px;
+        background-color: transparent;
+        border: none;
+        color: #eb7100;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+
+        .deleteIcon {
+          font-size: 24px;
+          font-weight: bold;
+        }
+
+        &:hover {
+          color: darkred;
+        }
+      }
     }
   }
 }
+

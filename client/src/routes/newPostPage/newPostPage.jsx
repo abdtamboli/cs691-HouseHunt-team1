@@ -11,7 +11,12 @@ function NewPostPage() {
   const [images, setImages] = useState([]);
   const [error, setError] = useState("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  // Function to handle image deletion
+  const handleDeleteImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -44,7 +49,8 @@ function NewPostPage() {
           restaurant: parseInt(inputs.restaurant),
         },
       });
-      navigate("/"+res.data.id)
+      // navigate("/" + res.data.id);
+      navigate("/list?type=buy&city=&minPrice=0&maxPrice=0");
     } catch (err) {
       console.log(err);
       setError(error);
@@ -99,7 +105,7 @@ function NewPostPage() {
                 <option value="rent" defaultChecked>
                   Rent
                 </option>
-                <option value="buy">Buy</option>
+                <option value="buy">Sell</option>
               </select>
             </div>
             <div className="item">
@@ -141,15 +147,15 @@ function NewPostPage() {
               <input min={0} id="size" name="size" type="number" />
             </div>
             <div className="item">
-              <label htmlFor="school">School</label>
+              <label htmlFor="school">School(Miles)</label>
               <input min={0} id="school" name="school" type="number" />
             </div>
             <div className="item">
-              <label htmlFor="bus">bus</label>
+              <label htmlFor="bus">bus(Miles)</label>
               <input min={0} id="bus" name="bus" type="number" />
             </div>
             <div className="item">
-              <label htmlFor="restaurant">Restaurant</label>
+              <label htmlFor="restaurant">Restaurant(Miles)</label>
               <input min={0} id="restaurant" name="restaurant" type="number" />
             </div>
             <button className="sendButton">Add</button>
@@ -158,6 +164,29 @@ function NewPostPage() {
         </div>
       </div>
       <div className="sideContainer">
+        {images.map((image, index) => (
+          <div key={index} className="imageWrapper">
+            <img src={image} alt="" />
+            <button
+              type="button"
+              className="deleteButton"
+              onClick={() => handleDeleteImage(index)}
+            >
+              <span className="deleteIcon">X</span>
+            </button>
+          </div>
+        ))}
+        <UploadWidget
+          uwConfig={{
+            multiple: true,
+            cloudName: "lamadev",
+            uploadPreset: "estate",
+            folder: "posts",
+          }}
+          setState={setImages}
+        />
+      </div>
+      {/* <div className="sideContainer">
         {images.map((image, index) => (
           <img src={image} key={index} alt="" />
         ))}
@@ -170,7 +199,7 @@ function NewPostPage() {
           }}
           setState={setImages}
         />
-      </div>
+      </div> */}
     </div>
   );
 }

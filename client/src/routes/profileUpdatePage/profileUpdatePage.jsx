@@ -23,7 +23,7 @@ function ProfileUpdatePage() {
         username,
         email,
         password,
-        avatar:avatar[0]
+        avatar: avatar[0]
       });
       updateUser(res.data);
       navigate("/profile");
@@ -39,7 +39,9 @@ function ProfileUpdatePage() {
         <form onSubmit={handleSubmit}>
           <h1>Update Profile</h1>
           <div className="item">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">
+              Username <span className="required">*</span>
+            </label>
             <input
               id="username"
               name="username"
@@ -48,7 +50,9 @@ function ProfileUpdatePage() {
             />
           </div>
           <div className="item">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">
+              Email <span className="required">*</span>
+            </label>
             <input
               id="email"
               name="email"
@@ -57,7 +61,9 @@ function ProfileUpdatePage() {
             />
           </div>
           <div className="item">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">
+              Password <span className="required">*</span>
+            </label>
             <input id="password" name="password" type="password" />
           </div>
           <button>Update</button>

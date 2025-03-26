@@ -11,6 +11,7 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      width: 50%;  // Ensures form takes full width of container
 
       .item {
         display: flex;
@@ -18,6 +19,12 @@
         gap: 5px;
 
         label {
+          font-size: 16px;  // You can adjust font size here
+          font-weight: bold;
+  
+          .required {
+            color: #eb7100;  // Set the star color here
+          }
         }
 
         input {
@@ -30,7 +37,7 @@
         padding: 20px;
         border-radius: 5px;
         border: none;
-        background-color: teal;
+        background-color: #eb7100;
         color: white;
         font-weight: bold;
         cursor: pointer;
@@ -40,7 +47,7 @@
 
   .sideContainer {
     flex: 2;
-    background-color: #fcf5f3;
+    background-color: #fbe2c7;
     display: flex;
     flex-direction: column;
     gap: 20px;
