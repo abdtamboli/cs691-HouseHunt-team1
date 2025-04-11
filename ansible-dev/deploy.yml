@@ -1,0 +1,108 @@
+- name: Configure EC2 Deployment Server for Dev
+  hosts: frontend
+  become: yes
+  tasks:
+    - name: Update and upgrade packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install required system dependencies
+      apt:
+        name: 
+          - curl
+          - unzip
+          - python3-pip
+          - docker.io
+        state: present
+
+    - name: Ensure AWS CLI is installed
+      command: aws --version
+      register: aws_cli_check
+      ignore_errors: yes
+
+    - name: Install AWS CLI if missing
+      shell: |
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
+        sudo ./aws/install
+      args:
+        creates: /usr/local/bin/aws
+      when: aws_cli_check.rc != 0
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Create custom Docker network
+      shell: docker network create househunt-network || true
+
+    - name: Set AWS Credentials for ECR Login
+      shell: |
+        export AWS_SHARED_CREDENTIALS_FILE=/home/ubuntu/.aws/credentials
+        export AWS_CONFIG_FILE=/home/ubuntu/.aws/config
+        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 314146332315.dkr.ecr.us-east-1.amazonaws.com
+      register: ecr_login
+      retries: 3
+      delay: 5
+      ignore_errors: yes
+
+    - name: Debug AWS ECR Login Output
+      debug:
+        msg: "{{ ecr_login.stdout }}"
+
+    # Stop and remove existing Dev containers (if any)
+    - name: Stop and remove existing Dev client container
+      shell: |
+        docker stop househunt-dev || true
+        docker rm househunt-dev || true
+      ignore_errors: yes
+
+    - name: Stop and remove existing Dev API container
+      shell: |
+        docker stop househunt-api-dev || true
+        docker rm househunt-api-dev || true
+      ignore_errors: yes
+
+    - name: Stop and remove existing Dev socket container
+      shell: |
+        docker stop socket-server-dev || true
+        docker rm socket-server-dev || true
+      ignore_errors: yes
+
+    # Pull latest Dev Docker images from AWS ECR
+    - name: Pull latest Dev client Docker image
+      shell: |
+        docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-dev:latest
+
+    - name: Pull latest Dev API Docker image
+      shell: |
+        docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-api-dev:latest
+
+    - name: Pull latest Dev socket Docker image
+      shell: |
+        docker pull 314146332315.dkr.ecr.us-east-1.amazonaws.com/socket-service-dev:latest
+
+    # Run Dev containers
+    - name: Run Dev client container
+      shell: |
+        docker run -d --name househunt-dev \
+        --network househunt-network \
+        -p 80:80 \
+        314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-dev:latest
+
+    - name: Run Dev API container
+      shell: |
+        docker run -d --name househunt-api-dev \
+        --network househunt-network \
+        -p 8800:8800 \
+        314146332315.dkr.ecr.us-east-1.amazonaws.com/househunt-api-dev:latest
+
+    - name: Run Dev Socket.IO container
+      shell: |
+        docker run -d --name socket-server-dev \
+        --network househunt-network \
+        -p 4000:4000 \
+        314146332315.dkr.ecr.us-east-1.amazonaws.com/socket-service-dev:latest

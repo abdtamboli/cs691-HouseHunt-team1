@@ -4,11 +4,15 @@ pipeline {
     environment {
         AWS_REGION = 'us-east-1'
         AWS_ACCOUNT_ID = '314146332315'
-        CLIENT_REPO = 'househunt'
-        API_REPO = 'househunt-api'
-        SOCKET_REPO = 'socket-service'
+
+        // Dev Repositories
+        CLIENT_REPO = 'househunt-dev'
+        API_REPO = 'househunt-api-dev'
+        SOCKET_REPO = 'socket-service-dev'
+
         IMAGE_TAG = 'latest'
-        EC2_PUBLIC_IP = "54.226.189.19"
+        EC2_PUBLIC_IP = "3.80.67.101"
+
         SSH_PRIVATE_KEY_PATH = "/var/jenkins_home/.ssh/jenkins-key.pem"
         SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"
     }
@@ -41,7 +45,6 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     script {
                         def client_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${CLIENT_REPO}:${IMAGE_TAG}"
-
                         sh """
                         cd client
                         docker build -t ${client_image} .
@@ -61,7 +64,6 @@ pipeline {
                 ]) {
                     script {
                         def api_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${API_REPO}:${IMAGE_TAG}"
-
                         sh """
                         cd api
                         cat \$ENV_FILE | sed 's|CLIENT_URL=.*|CLIENT_URL=http://${EC2_PUBLIC_IP}|' > temp_env
@@ -81,7 +83,6 @@ pipeline {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
                     script {
                         def socket_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SOCKET_REPO}:${IMAGE_TAG}"
-
                         sh """
                         cd socket
                         docker build -t ${socket_image} .
@@ -102,8 +103,8 @@ pipeline {
             steps {
                 script {
                     sh """
-                    echo "[frontend]" > ansible/inventory
-                    echo "${EC2_PUBLIC_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_PRIVATE_KEY_PATH}" >> ansible/inventory
+                    echo "[frontend]" > ansible-dev/inventory
+                    echo "${EC2_PUBLIC_IP} ansible_user=ubuntu ansible_ssh_private_key_file=${SSH_PRIVATE_KEY_PATH}" >> ansible-dev/inventory
                     """
                 }
             }
@@ -121,7 +122,7 @@ pipeline {
                         sh """
                         export ANSIBLE_HOST_KEY_CHECKING=False
                         ssh-keyscan -H ${EC2_PUBLIC_IP} >> /var/jenkins_home/.ssh/known_hosts
-                        ansible-playbook -i ansible/inventory ansible/deploy.yml \
+                        ansible-playbook -i ansible-dev/inventory ansible-dev/deploy.yml \
                         --extra-vars "docker_image_version=latest"
                         """
                     }
@@ -130,13 +131,13 @@ pipeline {
         }
     }
 
-   /* post {
+    post {
         success {
             script {
                 def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
                 sh """
                 curl -X POST -H 'Content-type: application/json' --data '{
-                    "text": "✅ *Build SUCCESS* 🚀\\n*Branch:* ${GIT_BRANCH} \\n*Job:* ${JOB_NAME} \\n*Build Number:* ${BUILD_NUMBER} \\n*Commit:* ${commitMsg} \\n*Server:* http://${EC2_PUBLIC_IP}/"
+                    "text": "✅ *Dev Build SUCCESS* 🚀\\n*Branch:* ${GIT_BRANCH} \\n*Job:* ${JOB_NAME} \\n*Build Number:* ${BUILD_NUMBER} \\n*Commit:* ${commitMsg} \\n*Server:* http://${EC2_PUBLIC_IP}/"
                 }' ${SLACK_WEBHOOK_URL}
                 """
             }
@@ -146,10 +147,10 @@ pipeline {
                 def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
                 sh """
                 curl -X POST -H 'Content-type: application/json' --data '{
-                    "text": "❌ *Build FAILED* ❗\\n*Branch:* ${GIT_BRANCH} \\n*Job:* ${JOB_NAME} \\n*Build Number:* ${BUILD_NUMBER} \\n*Commit:* ${commitMsg} \\nCheck Jenkins Logs for more details."
+                    "text": "❌ *Dev Build FAILED* ❗\\n*Branch:* ${GIT_BRANCH} \\n*Job:* ${JOB_NAME} \\n*Build Number:* ${BUILD_NUMBER} \\n*Commit:* ${commitMsg} \\nCheck Jenkins Logs for more details."
                 }' ${SLACK_WEBHOOK_URL}
                 """
             }
         }
-    }*/
+    }
 }
