@@ -59,7 +59,7 @@ pipeline {
         stage('Build and Push API Docker Image') {
             steps {
                 withCredentials([
-                    file(credentialsId: 'api-env-file', variable: 'ENV_FILE'),
+                    file(credentialsId: 'api-env-dev-file', variable: 'ENV_FILE'),
                     [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']
                 ]) {
                     script {
