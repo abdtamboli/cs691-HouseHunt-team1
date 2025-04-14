@@ -130,7 +130,7 @@ pipeline {
         }
     }
 
-   /* post {
+   post {
         success {
             script {
                 def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
@@ -151,5 +151,5 @@ pipeline {
                 """
             }
         }
-    }*/
+    }
 }
