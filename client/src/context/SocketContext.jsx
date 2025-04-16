@@ -13,7 +13,6 @@ export const SocketContextProvider = ({ children }) => {
     setSocket(io(socketURL));
   }, []);
 
-
   useEffect(() => {
   currentUser && socket?.emit("newUser", currentUser.id);
   }, [currentUser, socket]);

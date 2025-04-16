@@ -13,17 +13,47 @@ function SinglePage() {
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  // Determine if the logged-in user is the owner of the post.
+  const isOwner =
+    currentUser &&
+    (currentUser.id === post.user.id || currentUser.id === post.user._id);
+
   const handleSave = async () => {
     if (!currentUser) {
       navigate("/login");
+      return;
     }
-    // AFTER REACT 19 UPDATE TO USEOPTIMISTIK HOOK
+    // Prevent owner from saving their own post.
+    if (isOwner) return;
+
+    // Optimistic UI update.
     setSaved((prev) => !prev);
     try {
       await apiRequest.post("/users/save", { postId: post.id });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       setSaved((prev) => !prev);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    // Prevent owner from sending a message to themselves.
+    if (isOwner) return;
+
+    const receiverId = post.user.id || post.user._id;
+    if (!receiverId) {
+      console.error("Receiver ID is missing in post.user:", post.user);
+      return;
+    }
+    try {
+      await apiRequest.post("/chats", { receiverId });
+      navigate("/profile", { state: { chatWith: post.user } });
+    } catch (err) {
+      console.error("Error creating a new chat:", err);
     }
   };
 
@@ -139,14 +169,16 @@ function SinglePage() {
             <Map items={[post]} />
           </div>
           <div className="buttons">
-            <button>
+            <button onClick={handleSendMessage} disabled={isOwner}>
               <img src="/chat.png" alt="" />
-              Send a Message
+              {isOwner ? "Messaging Disabled" : "Send a Message"}
             </button>
             <button
               onClick={handleSave}
+              disabled={isOwner}
               style={{
                 backgroundColor: saved ? "#eb7100" : "white",
+                cursor: isOwner ? "not-allowed" : "pointer",
               }}
             >
               <img src="/save.png" alt="" />

@@ -36,6 +36,7 @@ export const getPost = async (req, res) => {
         postDetail: true,
         user: {
           select: {
+            id: true, // ← Ensure the id is included!
             username: true,
             avatar: true,
           },
@@ -50,7 +51,6 @@ export const getPost = async (req, res) => {
         token,
         process.env.JWT_SECRET_KEY,
         async (err, payload) => {
-          // ✅ Add return to prevent further execution
           if (!err) {
             const saved = await prisma.savedPost.findUnique({
               where: {
@@ -62,14 +62,14 @@ export const getPost = async (req, res) => {
             });
             return res
               .status(200)
-              .json({ ...post, isSaved: saved ? true : false }); // ✅ Use return here
+              .json({ ...post, isSaved: saved ? true : false });
           }
-          return res.status(200).json({ ...post, isSaved: false }); // ✅ Also return here
+          return res.status(200).json({ ...post, isSaved: false });
         }
       );
     }
 
-    return res.status(200).json({ ...post, isSaved: false }); // ✅ Return the response to prevent double execution
+    return res.status(200).json({ ...post, isSaved: false });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Failed to get post" });
