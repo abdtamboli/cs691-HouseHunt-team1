@@ -56,12 +56,15 @@ pipeline {
         stage('OWASP Dependency Check') {
             steps {
                 sh """
-                mkdir -p dependency-check-report
-                dependency-check.sh \
+                docker run --rm \
+                    -v "\$(pwd):/src" \
+                    -v "\$(pwd)/odc-data:/usr/share/dependency-check/data" \
+                    -v "\$(pwd)/dependency-check-report:/report" \
+                    owasp/dependency-check \
                     --project "HouseHunt" \
-                    --scan . \
-                    --format "HTML" \
-                    --out dependency-check-report
+                    --scan /src \
+                    --format HTML \
+                    --out /report
                 """
             }
         }
