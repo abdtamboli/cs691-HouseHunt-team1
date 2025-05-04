@@ -53,17 +53,20 @@ pipeline {
             }
         }
 
-        stage('OWASP Dependency Check') {
+       stage('OWASP Dependency Check') {
             steps {
-                sh '''
-                    dependency-check.sh \
-                    --project "HouseHunt" \
-                    --scan . \
-                    --format ALL \
-                    --out dependency-check-report \
-                    --disableAssembly \
-                    --enableExperimental
-                '''
+                sh """
+                rm -rf dependency-check-report || true
+
+                dependency-check.sh \\
+                --project "HouseHunt" \\
+                --scan client api socket \\
+                --format ALL \\
+                --out dependency-check-report \\
+                --disableAssembly \\
+                --enableExperimental \\
+                --noupdate
+                """
             }
         }
 
