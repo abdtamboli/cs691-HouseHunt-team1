@@ -170,8 +170,8 @@ pipeline {
         }*/
         always {
             recordIssues tools: [
-                eslint(pattern: 'client/eslint-report.json'),
-                eslint(pattern: 'api/eslint-report.json')
+                esLint(pattern: 'client/eslint-report.json'),
+                esLint(pattern: 'api/eslint-report.json')
             ]
         }
     }
