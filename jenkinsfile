@@ -52,14 +52,15 @@ pipeline {
                 }
             }
         }
-        
+
         stage('OWASP Dependency Check') {
             steps {
                 sh """
+                mkdir -p dependency-check-report
                 dependency-check.sh \
                     --project "HouseHunt" \
                     --scan . \
-                    --format "ALL" \
+                    --format "HTML" \
                     --out dependency-check-report
                 """
             }
@@ -181,11 +182,13 @@ pipeline {
             }
         }*/
         always {
+            // Publish ESLint reports
             recordIssues tools: [
                 esLint(pattern: 'client/eslint-report.xml', id: 'eslint-client', name: 'ESLint Client'),
                 esLint(pattern: 'api/eslint-report.xml', id: 'eslint-api', name: 'ESLint API')
             ]
 
+            // Publish OWASP Dependency-Check HTML report
             publishHTML([
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
