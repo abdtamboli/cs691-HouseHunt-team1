@@ -173,6 +173,15 @@ pipeline {
                 esLint(pattern: 'client/eslint-report.xml', id: 'eslint-client', name: 'ESLint Client'),
                 esLint(pattern: 'api/eslint-report.xml', id: 'eslint-api', name: 'ESLint API')
             ]
+
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'dependency-check-report',
+                reportFiles: 'dependency-check-report.html',
+                reportName: 'OWASP Dependency-Check Report'
+            ])
         }
     }
 }
