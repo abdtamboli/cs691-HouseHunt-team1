@@ -53,20 +53,26 @@ pipeline {
             }
         }
 
-       stage('OWASP Dependency Check') {
+        stage('OWASP Dependency Check') {
             steps {
-                sh """
-                rm -rf dependency-check-report || true
+                script {
+                    sh """
+                    echo "🔍 Creating output folder for dependency check report..."
+                    mkdir -p dependency-check-report
 
-                dependency-check.sh \\
-                --project "HouseHunt" \\
-                --scan client api socket \\
-                --format ALL \\
-                --out dependency-check-report \\
-                --disableAssembly \\
-                --enableExperimental \\
-                --noupdate
-                """
+                    echo "🔐 Running OWASP Dependency Check..."
+                    dependency-check.sh \\
+                      --project "HouseHunt" \\
+                      --scan client api socket \\
+                      --format ALL \\
+                      --out dependency-check-report \\
+                      --disableAssembly \\
+                      --enableExperimental \\
+                      --noupdate
+
+                    echo "✅ OWASP Dependency Check completed. Reports generated in dependency-check-report/"
+                    """
+                }
             }
         }
 
