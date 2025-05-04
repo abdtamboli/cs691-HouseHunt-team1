@@ -133,6 +133,22 @@ pipeline {
             }
         }
 
+        // ✅ Manual Approval Stage (admin-only)
+        stage('Manual Approval for Production Deployment') {
+            steps {
+                script {
+                    input(
+                        message: "🚨 Manual Approval Required for Production Deployment",
+                        ok: "Deploy Now",
+                        submitter: "admin", // Only 'admin' can approve
+                        parameters: [
+                            string(name: 'DEPLOY_NOTES', defaultValue: '', description: 'Optional notes before deploying')
+                        ]
+                    )
+                }
+            }
+        }
+
         stage('Update Ansible Inventory') {
             when {
                 expression {
