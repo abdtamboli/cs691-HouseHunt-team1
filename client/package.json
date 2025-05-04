@@ -7,7 +7,7 @@
   "dev": "vite",
   "build": "vite build",
   "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-  "lint:ci": "eslint . --ext js,jsx --format json --output-file eslint-report.json || true",
+ "lint:ci": "eslint . --ext js,jsx --format checkstyle --output-file eslint-report.xml || true",
   "preview": "vite preview"
 },
   "dependencies": {

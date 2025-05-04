@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon app.js",
-    "lint": "eslint . -f json -o eslint-report.json"
+    "lint": "eslint . -f checkstyle -o eslint-report.xml"
   },
   "keywords": [],
   "author": "",
