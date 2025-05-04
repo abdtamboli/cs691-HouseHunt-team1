@@ -20,17 +20,34 @@ pipeline {
             }
         }
 
-        stage('Run NPM Tests (If Available)') {
+        stage('Run Lint and NPM Tests') {
             steps {
                 script {
                     sh """
+                    # Run lint:ci and tests in client
                     cd client
-                    if [ -f package.json ] && grep -q '"test"' package.json; then
+                    if [ -f package.json ]; then
                         npm install
-                        npm test
-                    else
-                        echo "No NPM tests found, skipping..."
+                        if grep -q '"lint:ci"' package.json; then
+                            npm run lint:ci || true
+                        fi
+                        if grep -q '"test"' package.json; then
+                            npm test
+                        else
+                            echo "No NPM tests found for client, skipping..."
+                        fi
                     fi
+                    cd ..
+
+                    # Run lint:ci in API
+                    cd api
+                    if [ -f package.json ]; then
+                        npm install
+                        if grep -q '"lint:ci"' package.json; then
+                            npm run lint:ci || true
+                        fi
+                    fi
+                    cd ..
                     """
                 }
             }
@@ -130,8 +147,8 @@ pipeline {
         }
     }
 
-   post {
-        success {
+    post {
+        /*success {
             script {
                 def commitMsg = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
                 sh """
@@ -150,6 +167,12 @@ pipeline {
                 }' ${SLACK_WEBHOOK_URL}
                 """
             }
+        }*/
+        always {
+            recordIssues tools: [
+                eslint(pattern: 'client/eslint-report.json'),
+                eslint(pattern: 'api/eslint-report.json')
+            ]
         }
     }
 }
