@@ -55,13 +55,15 @@ pipeline {
 
         stage('OWASP Dependency Check') {
             steps {
-                sh """
-                dependency-check.sh \
+                sh '''
+                    dependency-check.sh \
                     --project "HouseHunt" \
                     --scan . \
-                    --format "ALL" \
-                    --out dependency-check-report
-                """
+                    --format ALL \
+                    --out dependency-check-report \
+                    --disableAssembly \
+                    --enableExperimental
+                '''
             }
         }
 
