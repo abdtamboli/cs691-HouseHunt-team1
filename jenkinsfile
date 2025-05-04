@@ -76,6 +76,17 @@ pipeline {
             }
         }
 
+        stage('Performance Test') {
+            steps {
+                script {
+                    sh """
+                    mkdir -p performance-results
+                    jmeter -n -t performance/househunt_performance_test.jmx -l performance-results/result.jtl -e -o performance-results/html-report
+                    """
+                }
+            }
+        }
+
         stage('Build and Push Client Docker Image') {
             steps {
                 withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
@@ -222,6 +233,16 @@ pipeline {
                 reportDir: 'dependency-check-report',
                 reportFiles: 'dependency-check-report.html',
                 reportName: 'OWASP Dependency-Check Report'
+            ])
+
+            // Publish Performance HTML report
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'performance-results/html-report',
+                reportFiles: 'index.html',
+                reportName: 'JMeter Performance Report'
             ])
         }
     }
