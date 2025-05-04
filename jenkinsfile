@@ -56,22 +56,22 @@ pipeline {
         stage('OWASP Dependency Check') {
             steps {
                 script {
-                    sh """
-                    echo "🔍 Creating output folder for dependency check report..."
-                    mkdir -p dependency-check-report
-
-                    echo "🔐 Running OWASP Dependency Check..."
-                    dependency-check.sh \\
-                      --project "HouseHunt" \\
-                      --scan client api socket \\
-                      --format ALL \\
-                      --out dependency-check-report \\
-                      --disableAssembly \\
-                      --enableExperimental \\
-                      --noupdate
-
-                    echo "✅ OWASP Dependency Check completed. Reports generated in dependency-check-report/"
-                    """
+                    if (fileExists('dependency-check-report/dependency-check-report.html')) {
+                        echo "📄 OWASP Dependency Check report already exists. Skipping scan."
+                    } else {
+                        echo "📂 Running dependency check because no report found..."
+                        sh '''
+                        mkdir -p dependency-check-report
+                        dependency-check.sh \\
+                          --project "HouseHunt" \\
+                          --scan . \\
+                          --format ALL \\
+                          --out dependency-check-report \\
+                          --disableAssembly \\
+                          --enableExperimental \\
+                          --noupdate
+                        '''
+                    }
                 }
             }
         }
