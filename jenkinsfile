@@ -166,7 +166,7 @@ pipeline {
             steps {
                 script {
                     input(
-                        message: "🚨 Manual Approval Required for Production Deployment",
+                        message: "🚨 Manual Approval Required for the Production Deployment",
                         ok: "Deploy Now",
                         submitter: "admin", // Only 'admin' can approve
                         parameters: [
