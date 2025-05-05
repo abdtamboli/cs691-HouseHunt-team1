@@ -76,14 +76,20 @@ pipeline {
             }
         }
 
-        stage('Performance Test') {
+        stage('Run JMeter Performance Tests') {
             steps {
                 script {
-                    sh """
+                    sh '''
+                    # Clean up old results
                     rm -rf performance-results/html-report
+                    rm -f performance-results/result.jtl
+
+                    # Create required directory again
                     mkdir -p performance-results
+
+                    # Run JMeter test and generate dashboard
                     jmeter -n -t performance/househunt_performance_test.jmx -l performance-results/result.jtl -e -o performance-results/html-report
-                    """
+                    '''
                 }
             }
         }
