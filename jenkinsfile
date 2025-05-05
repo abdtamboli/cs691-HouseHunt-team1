@@ -80,6 +80,7 @@ pipeline {
             steps {
                 script {
                     sh """
+                    rm -rf performance-results/html-report
                     mkdir -p performance-results
                     jmeter -n -t performance/househunt_performance_test.jmx -l performance-results/result.jtl -e -o performance-results/html-report
                     """
