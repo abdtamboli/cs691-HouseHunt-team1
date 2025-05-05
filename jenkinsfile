@@ -55,22 +55,24 @@ pipeline {
 
         stage('OWASP Dependency Check') {
             steps {
-                script {
-                    if (fileExists('dependency-check-report/dependency-check-report.html')) {
-                        echo "📄 OWASP Dependency Check report already exists. Skipping scan."
-                    } else {
-                        echo "📂 Running dependency check because no report found..."
-                        sh '''
-                        mkdir -p dependency-check-report
-                        dependency-check.sh \\
-                          --project "HouseHunt" \\
-                          --scan . \\
-                          --format ALL \\
-                          --out dependency-check-report \\
-                          --disableAssembly \\
-                          --enableExperimental \\
-                          --noupdate
-                        '''
+                retry(2) {
+                    script {
+                        if (fileExists('dependency-check-report/dependency-check-report.html')) {
+                            echo "📄 OWASP Dependency Check report already exists. Skipping scan."
+                        } else {
+                            echo "📂 Running dependency check because no report found..."
+                            sh '''
+                            mkdir -p dependency-check-report
+                            dependency-check.sh \\
+                              --project "HouseHunt" \\
+                              --scan . \\
+                              --format ALL \\
+                              --out dependency-check-report \\
+                              --disableAssembly \\
+                              --enableExperimental \\
+                              --noupdate
+                            '''
+                        }
                     }
                 }
             }
@@ -78,34 +80,38 @@ pipeline {
 
         stage('Run JMeter Performance Tests') {
             steps {
-                script {
-                    sh '''
-                    # Clean up old results
-                    rm -rf performance-results/html-report
-                    rm -f performance-results/result.jtl
+                retry(2) {
+                    script {
+                        sh '''
+                        # Clean up old results
+                        rm -rf performance-results/html-report
+                        rm -f performance-results/result.jtl
 
-                    # Create required directory again
-                    mkdir -p performance-results
+                        # Create required directory again
+                        mkdir -p performance-results
 
-                    # Run JMeter test and generate dashboard
-                    jmeter -n -t performance/househunt_performance_test.jmx -l performance-results/result.jtl -e -o performance-results/html-report
-                    '''
+                        # Run JMeter test and generate dashboard
+                        jmeter -n -t performance/househunt_performance_test.jmx -l performance-results/result.jtl -e -o performance-results/html-report
+                        '''
+                    }
                 }
             }
         }
 
         stage('Build and Push Client Docker Image') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    script {
-                        def client_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${CLIENT_REPO}:${IMAGE_TAG}"
+                retry(2) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        script {
+                            def client_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${CLIENT_REPO}:${IMAGE_TAG}"
 
-                        sh """
-                        cd client
-                        docker build -t ${client_image} .
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                        docker push ${client_image}
-                        """
+                            sh """
+                            cd client
+                            docker build -t ${client_image} .
+                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                            docker push ${client_image}
+                            """
+                        }
                     }
                 }
             }
@@ -113,22 +119,24 @@ pipeline {
 
         stage('Build and Push API Docker Image') {
             steps {
-                withCredentials([
-                    file(credentialsId: 'api-env-file', variable: 'ENV_FILE'),
-                    [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']
-                ]) {
-                    script {
-                        def api_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${API_REPO}:${IMAGE_TAG}"
+                retry(2) {
+                    withCredentials([
+                        file(credentialsId: 'api-env-file', variable: 'ENV_FILE'),
+                        [$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']
+                    ]) {
+                        script {
+                            def api_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${API_REPO}:${IMAGE_TAG}"
 
-                        sh """
-                        cd api
-                        cat \$ENV_FILE | sed 's|CLIENT_URL=.*|CLIENT_URL=http://${EC2_PUBLIC_IP}|' > temp_env
-                        mv temp_env .env
+                            sh """
+                            cd api
+                            cat \$ENV_FILE | sed 's|CLIENT_URL=.*|CLIENT_URL=http://${EC2_PUBLIC_IP}|' > temp_env
+                            mv temp_env .env
 
-                        docker build -t ${api_image} .
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                        docker push ${api_image}
-                        """
+                            docker build -t ${api_image} .
+                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                            docker push ${api_image}
+                            """
+                        }
                     }
                 }
             }
@@ -136,16 +144,18 @@ pipeline {
 
         stage('Build and Push Socket Docker Image') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    script {
-                        def socket_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SOCKET_REPO}:${IMAGE_TAG}"
+                retry(2) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        script {
+                            def socket_image = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${SOCKET_REPO}:${IMAGE_TAG}"
 
-                        sh """
-                        cd socket
-                        docker build -t ${socket_image} .
-                        aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
-                        docker push ${socket_image}
-                        """
+                            sh """
+                            cd socket
+                            docker build -t ${socket_image} .
+                            aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+                            docker push ${socket_image}
+                            """
+                        }
                     }
                 }
             }
@@ -190,14 +200,16 @@ pipeline {
                 }
             }
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
-                    script {
-                        sh """
-                        export ANSIBLE_HOST_KEY_CHECKING=False
-                        ssh-keyscan -H ${EC2_PUBLIC_IP} >> /var/jenkins_home/.ssh/known_hosts
-                        ansible-playbook -i ansible/inventory ansible/deploy.yml \
-                        --extra-vars "docker_image_version=latest"
-                        """
+                retry(2) {
+                    withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-credentials']]) {
+                        script {
+                            sh """
+                            export ANSIBLE_HOST_KEY_CHECKING=False
+                            ssh-keyscan -H ${EC2_PUBLIC_IP} >> /var/jenkins_home/.ssh/known_hosts
+                            ansible-playbook -i ansible/inventory ansible/deploy.yml \\
+                            --extra-vars "docker_image_version=latest"
+                            """
+                        }
                     }
                 }
             }
