@@ -5,6 +5,8 @@ import apiRequest from "../../lib/apiRequest";
 function Card({ item, editable }) {
   const navigate = useNavigate();
 
+  const available = item.status === "available";
+
   const handleUpdate = () => {
     navigate(`/update/${item.id}`);
   };
@@ -26,13 +28,27 @@ function Card({ item, editable }) {
   };
 
   return (
-    <div className="card">
-      <Link to={`/${item.id}`} className="imageContainer">
-        <img src={item.images[0]} alt="" />
-      </Link>
+    <div className={`card ${available ? "" : "unavailable"}`}>
+      {available ? (
+        <Link to={`/${item.id}`} className="imageContainer">
+          <img src={item.images[0]} alt="" />
+        </Link>
+      ) : (
+        <div className="imageContainer">
+          <img src={item.images[0]} alt="" />
+          <div className="badge">
+            {item.status === "sold" ? "Sold" : "Rented"}
+          </div>
+        </div>
+      )}
+
       <div className="textContainer">
         <h2 className="title">
-          <Link to={`/${item.id}`}>{item.title}</Link>
+          {available ? (
+            <Link to={`/${item.id}`}>{item.title}</Link>
+          ) : (
+            item.title
+          )}
         </h2>
         <p className="address">
           <img src="/pin.png" alt="" />
@@ -50,16 +66,7 @@ function Card({ item, editable }) {
               <span>{item.bathroom} bathroom</span>
             </div>
           </div>
-          <div className="icons">
-            <div className="icon">
-              <img src="/save.png" alt="" />
-            </div>
-            <div className="icon">
-              <img src="/chat.png" alt="" />
-            </div>
-          </div>
         </div>
-        {/* Only show these buttons when editable is true */}
         {editable && (
           <div className="postActions">
             <button onClick={handleUpdate}>Update Post</button>

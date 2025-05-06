@@ -1,59 +1,58 @@
 @import "../../responsive.scss";
 
+/* Make the root a normal block so document height grows */
 .homePage {
+  display: block;
+  padding-bottom: 0;         /* no extra constraints */
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Flex‐row for your hero section */
+.mainContent {
   display: flex;
-  height: 100%;
+  flex-wrap: wrap;     /* wrap on small screens */
 
   .textContainer {
     flex: 3;
-
     .wrapper {
-      padding-right: 100px;
+      padding: 10px;
+      margin-right: 30px;
       display: flex;
       flex-direction: column;
-      justify-content: center;
-      gap: 50px;
-      height: 100%;
+      gap: 30px;
 
-      @include lg{
-        padding-right: 50px;
-      }
-
-      @include md{
-        padding: 0;
-      }
-
-      @include sm{
-        justify-content: flex-start;
-      }
+      @include lg { padding: 30px; }
+      @include md { padding: 20px; }
+      @include sm { padding: 20px 10px; }
 
       .title {
         font-size: 64px;
-
-        @include lg {
-          font-size: 48px;
-        }
+        line-height: 1.2;
+        @include lg { font-size: 48px; }
+        @include md { font-size: 36px; }
       }
-
+      p {
+        font-size: 18px;
+        max-width: 600px;
+        color: #555;
+      }
       .boxes {
         display: flex;
-        justify-content: space-between;
-
+        margin-top: 5px;
+        gap: 20px;
         @include sm {
-          display: none;
+          flex-direction: column;
+          gap: 10px;
         }
-
-        h1 {
-          font-size: 36px;
-
-          @include lg {
-            font-size: 32px;
-          }
-        }
-
-        h2 {
-          font-size: 20px;
-          font-weight: 300;
+        .box {
+          flex: 1;
+          background: #fbe2c7;
+          padding: 10px;
+          border-radius: 8px;
+          text-align: center;
+          h1 { font-size: 36px; margin: 0; }
+          h2 { font-size: 18px; font-weight: 300; margin: 0; }
         }
       }
     }
@@ -65,30 +64,89 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 87vh;
     img {
-      width: 100%;
+      max-width: 95%;
+      margin-top: -15%;
+
     }
   }
+}
 
-  // .imgContainer {
-  //   flex: 2;
-  //   background-color: #EBE8FC;
-  //   position: relative;
-  //   display: flex;
-  //   align-items: center;
+/* Promo Banner Section */
+.promoBanner {
+  width: 100%;
+  margin-top: -9%;
+  padding: 20px 0;
+  background-color: #fafafa;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100px; // Ensures it's always visible even with short content
+}
 
-  //   @include md {
-  //     display: none;
-  //   }
+.promoTrack {
+  display: flex;
+  gap: 40px;
+  animation: marquee 20s linear infinite;
+}
 
-  //   img {
-  //     width: 115%;
-  //     position: absolute;
-  //     right: 0;
+.promoTrack img {
+  height: 80px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
 
-  //     @include lg {
-  //       width: 105%;
-  //     }
-  //   }
-  // }
+/* Adjusted Keyframe Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+/* Promo Banner Section */
+/* === Promo Banner Section (Final Version) === */
+.promoBanner {
+  width: 60%;
+  padding: 30px 0;
+  background-color: #fafafa;
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120px;
+  box-sizing: border-box;
+}
+
+.promoTrack {
+  display: flex;
+  gap: 40px;
+  animation: marquee 20s linear infinite;
+  align-items: center;
+  height: 100%;
+}
+
+.promoTrack img {
+  height: 100px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  object-fit: contain;
+}
+
+/* Only one keyframes definition */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }

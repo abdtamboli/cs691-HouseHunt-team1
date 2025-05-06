@@ -3,6 +3,7 @@
 .singlePage {
   display: flex;
   height: 100%;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 
   @include md {
     flex-direction: column;
@@ -21,20 +22,24 @@
     }
 
     .wrapper {
-      padding-right: 50px;
+      padding: 0 50px;
 
       @include lg {
-        padding-right: 20px;
+        padding: 0 20px;
       }
+
       @include md {
-        padding-right: 0px;
+        padding: 0;
       }
 
       .info {
         margin-top: 50px;
+
         .top {
           display: flex;
           justify-content: space-between;
+          align-items: flex-start;
+          gap: 40px;
 
           @include sm {
             flex-direction: column;
@@ -44,65 +49,146 @@
           .post {
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            h1 {
-              font-weight: 400;
+            gap: 16px;
+
+            .titleContainer {
+              display: inline-flex;      /* inline so it hugs the text */
+              align-items: center;
+              gap: 15px;                 /* small gap between title & icon */
             }
+      
+            /* remove the old margin-left:auto; from shareContainer */
+            .shareContainer {
+              position: relative;
+              cursor: pointer;
+              margin-top: 5px;
+      
+              img {
+                width: 30px;
+                height: 30px;
+              }
+      
+              .shareMenu {
+                top: 110%;
+                right: 0;
+              
+                div {
+                  padding: 8px 12px;
+                  font-size: 14px;
+                  cursor: pointer;
+                  &:hover {
+                    background-color: #f0f0f0;
+                  }
+                }
+              }
+            }
+
+            h1 {
+              font-size: 30px;
+              font-weight: 600;
+              color: #222;
+              line-height: 1.3;
+            }
+
             .address {
               display: flex;
-              gap: 5px;
               align-items: center;
-              color: #888;
+              gap: 6px;
               font-size: 14px;
+              color: #888;
 
               img {
                 width: 16px;
                 height: 16px;
               }
             }
-            .price {
-              padding: 5px;
-              background-color: #fbe2c7;
-              border-radius: 5px;
-              width: max-content;
-              font-size: 20px;
-              font-weight: 300;
+
+            .priceSection {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              flex-wrap: wrap;
+              white-space: nowrap;
+              margin-bottom: -17px;
+
+              .price {
+                background-color: #fbe2c7;
+                margin-bottom: 4px;
+                padding: 10px 14px;
+                border-radius: 10px;
+                font-size: 24px;
+                font-weight: 600;
+                color: #e77524;
+                width: fit-content;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+              }
+
+              .priceButton {
+                background-color: #fbe2c7;
+                padding: 10px 14px;
+                border-radius: 10px;
+                font-size: 16px;
+                font-weight: 600;
+                color: #d95b00;
+                border: none;
+                cursor: pointer;
+                transition: 0.3s all;
+                white-space: nowrap;
+
+                &:hover:not(:disabled) {
+                  background-color: #eb7100;
+                  color: white;
+                }
+
+                &:disabled {
+                  background-color: #ddd;
+                  cursor: not-allowed;
+                }
+              }
             }
           }
+
           .user {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 20px;
-            padding: 0px 50px;
+            gap: 10px;
+            background-color: #fef1e1;
+            padding: 15px 30px;
             border-radius: 10px;
-            background-color: #fbe2c7;
-            font-weight: 600;
-
-            @include sm {
-              padding: 20px 50px;
-            }
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 
             img {
-              width: 50px;
-              height: 50px;
+              width: 60px;
+              height: 60px;
               border-radius: 50%;
               object-fit: cover;
             }
+
+            span {
+              font-weight: 600;
+              color: #333;
+            }
           }
         }
+
         .bottom {
-          margin-top: 50px;
-          color: #555;
-          line-height: 20px;
+          margin-top: 40px;
+          padding-top: 20px;
+          padding-bottom: 20px;
+          border-top: 1px solid #eee;
+          font-size: 15px;
+          color: #444;
+          line-height: 1.7;
         }
       }
     }
   }
+
   .features {
     flex: 2;
-    background-color: #fbe2c7;
+    background-color: #fef1e1;
     height: 100%;
     overflow-y: scroll;
 
@@ -113,25 +199,16 @@
     }
 
     .wrapper {
-      padding: 0px 20px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
-      gap: 20px;
-      background-color: #fbe2c7;
-
-      @include md {
-        padding: 20px;
-      }
-
-      img {
-        width: 24px;
-        height: 24px;
-      }
+      gap: 25px;
 
       .title {
-        font-weight: bold;
-        font-size: 18px;
+        font-size: 20px;
+        font-weight: 700;
         margin-bottom: 10px;
+        color: #eb7100;
       }
 
       .feature {
@@ -140,78 +217,321 @@
         gap: 10px;
 
         img {
-          background-color: #fbe2c7;
+          width: 24px;
+          height: 24px;
         }
 
         .featureText {
           span {
             font-weight: bold;
+            color: #333;
           }
+
           p {
             font-size: 14px;
+            color: #666;
           }
         }
       }
 
-      .listVertical {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        padding: 20px 10px;
-        background-color: white;
-        border-radius: 10px;
-      }
+      .listVertical,
       .listHorizontal {
-        display: flex;
-        justify-content: space-between;
-        padding: 20px 10px;
         background-color: white;
         border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        gap: 20px;
+
+        @include sm {
+          flex-direction: column;
+        }
+      }
+
+      .listVertical {
+        flex-direction: column;
+      }
+
+      .listHorizontal {
+        justify-content: space-between;
       }
 
       .sizes {
         display: flex;
         justify-content: space-between;
-
-        @include lg {
-          font-size: 12px;
-        }
+        gap: 10px;
 
         .size {
+          background-color: white;
+          padding: 10px 25px;
+          border-radius: 8px;
           display: flex;
           align-items: center;
-          gap: 10px;
-          background-color: white;
-          padding: 10px;
-          border-radius: 5px;
+          gap: 8px;
+          font-size: 16px;
+          color: #333;
+
+          img {
+            width: 30px;
+            height: 30px;
+          }
         }
       }
 
       .mapContainer {
         width: 100%;
-        height: 200px;
+        height: 220px;
+        border-radius: 10px;
+        overflow: hidden;
       }
 
       .buttons {
         display: flex;
-        justify-content: space-between;
+        gap: 15px;
 
         button {
-          padding: 20px;
+          flex: 1;
+          padding: 15px 20px;
           display: flex;
           align-items: center;
-          gap: 5px;
-          background-color: white;
+          justify-content: center;
+          gap: 8px;
+          font-weight: 600;
           border: 1px solid #eb7100;
-          border-radius: 5px;
+          border-radius: 8px;
+          background-color: white;
           cursor: pointer;
+          transition: all 0.3s ease;
 
           img {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
+          }
+
+          &:hover:not(:disabled) {
+            background-color: #eb7100;
+            color: white;
+
+            img {
+              filter: brightness(0) invert(1);
+            }
+          }
+
+          &:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+          }
+
+          &.saved {
+            background-color: #eb7100;
+            color: white;
+
+            img {
+              filter: brightness(0) invert(1);
+            }
           }
         }
       }
     }
+  }
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 90%;
+  text-align: center;
+  position: relative;
+}
+
+.modalContent h2 {
+  color: #eb7100;
+  margin-bottom: 25px;
+}
+
+.modalContent input,
+.modalContent textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 24px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.modalContent button[type="submit"] {
+  padding: 10px 30px;
+  font-size: 18px;
+  background-color: #eb7100;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+.modalContent .closeBtn {
+  position: absolute;
+  padding: 6px 12px;
+  top: 20px;
+  right: 15px;
+  background-color: #eb7100;
+  border-radius: 6px;
+  font-size: 20px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+/* ➡️ NEW invoice styles */
+.invoiceDetails {
+  text-align: left;
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #444;
+
+  p {
+    margin: 10px 0;
+  }
+
+  .receiptTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+
+    td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      font-size: 15px;
+      color: #555;
+    }
+
+    td:first-child {
+      font-weight: 600;
+      width: 40%;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+  }
+}
+
+/* ——— APPENDED: SHARE POPUP + BUTTON STYLING ——— */
+
+.shareOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.shareModal {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 360px;
+  position: relative;
+  text-align: center;
+
+  h2 {
+    margin-bottom: 20px;
+    color: #333;
+  }
+
+  .shareOptions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: #f9f9f9;
+      cursor: pointer;
+      transition: background 0.2s;
+
+      img {
+        width: 24px;
+        height: 24px;
+      }
+
+      span {
+        font-size: 15px;
+        color: #333;
+      }
+
+      &:hover {
+        background: #eee;
+      }
+    }
+  }
+
+  .closeBtn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+  }
+}
+
+/* Style the share icon itself */
+
+.singlePage {
+  .titleContainer {
+    .shareBtn {
+      width: 35px;
+      height: 35px;
+      margin-top: 5px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      &:hover {
+        transform: scale(1.1);
+      }
+    }
+    .rating {
+      display: inline-flex;
+      margin-left: 2%;
+      align-items: center;
+      gap: 4px;
+      font-size: 26px;
+      color: #f89f0f; /* golden */
+
+      .stars {
+        /* static 4 full, 1 empty star */
+      }
+
+      .value {
+        font-size: 14px;
+        color: #100b0b;
+      }}
   }
 }

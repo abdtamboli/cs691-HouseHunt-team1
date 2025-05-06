@@ -4,7 +4,7 @@
   display: flex;
   height: 100%;
 
-  @include md{
+  @include md {
     flex-direction: column;
     overflow: scroll;
   }
@@ -14,27 +14,27 @@
     overflow-y: scroll;
     padding-bottom: 50px;
 
-    @include md{
-      flex:none;
+    @include md {
+      flex: none;
       height: max-content;
     }
 
-    .wrapper{
+    .wrapper {
       padding-right: 50px;
       display: flex;
       flex-direction: column;
       gap: 50px;
 
-      .title{
+      .title {
         display: flex;
         align-items: center;
         justify-content: space-between;
 
-        h1{
+        h1 {
           font-weight: 300;
         }
 
-        button{
+        button {
           padding: 12px 24px;
           background-color: #eb7100;
           cursor: pointer;
@@ -44,18 +44,18 @@
         }
       }
 
-      .info{
+      .info {
         display: flex;
         flex-direction: column;
         gap: 20px;
 
-        span{
+        span {
           display: flex;
           align-items: center;
           gap: 20px;
         }
 
-        button{
+        button {
           width: 100px;
           background-color: #eb7100;
           border: none;
@@ -65,7 +65,7 @@
           border-radius: 5px;
         }
 
-        img{
+        img {
           width: 40px;
           height: 40px;
           border-radius: 50%;
@@ -74,19 +74,88 @@
       }
     }
   }
+
   .chatContainer {
     flex: 2;
     background-color: #fbe2c7;
     height: 100%;
 
-    @include md{
-      flex:none;
+    @include md {
+      flex: none;
       height: max-content;
     }
 
-    .wrapper{
+    .wrapper {
       padding: 0px 20px;
       height: 100%;
     }
   }
+}
+
+/* Modal Popup Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  position: relative;
+  background: #fff;
+  padding: 30px 40px;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #eb7100;
+}
+
+.modalContent p {
+  margin: 20px 0;
+  font-size: 1rem;
+  color: #333;
+}
+
+.modalButtons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.modalBtn {
+  padding: 10px 20px;
+  background-color: #eb7100;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.modalBtn:hover {
+  background-color: darken(#eb7100, 10%);
+}
+
+.closeBtn {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #888;
 }

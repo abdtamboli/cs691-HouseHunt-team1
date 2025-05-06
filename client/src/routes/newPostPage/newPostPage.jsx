@@ -50,7 +50,7 @@ function NewPostPage() {
         },
       });
       // navigate("/" + res.data.id);
-      navigate("/list?type=buy&city=&minPrice=0&maxPrice=0");
+      navigate("/list?type=&city=&minPrice=0&maxPrice=0");
     } catch (err) {
       console.log(err);
       setError(error);
@@ -186,20 +186,6 @@ function NewPostPage() {
           setState={setImages}
         />
       </div>
-      {/* <div className="sideContainer">
-        {images.map((image, index) => (
-          <img src={image} key={index} alt="" />
-        ))}
-        <UploadWidget
-          uwConfig={{
-            multiple: true,
-            cloudName: "lamadev",
-            uploadPreset: "estate",
-            folder: "posts",
-          }}
-          setState={setImages}
-        />
-      </div> */}
     </div>
   );
 }

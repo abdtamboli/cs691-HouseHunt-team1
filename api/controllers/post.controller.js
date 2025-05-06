@@ -1,9 +1,13 @@
+// controllers/post.controller.js
+
 import prisma from "../lib/prisma.js";
 import jwt from "jsonwebtoken";
 
+// Simple ObjectId validator (24 hex chars)
+const isValidObjectId = (id) => /^[0-9a-fA-F]{24}$/.test(id);
+
 export const getPosts = async (req, res) => {
   const query = req.query;
-
   try {
     const posts = await prisma.post.findMany({
       where: {
@@ -17,40 +21,39 @@ export const getPosts = async (req, res) => {
         },
       },
     });
-
-    // setTimeout(() => {
     res.status(200).json(posts);
-    // }, 3000);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).json({ message: "Failed to get posts" });
   }
 };
 
 export const getPost = async (req, res) => {
   const id = req.params.id;
+  if (!isValidObjectId(id)) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+
   try {
     const post = await prisma.post.findUnique({
       where: { id },
       include: {
         postDetail: true,
         user: {
-          select: {
-            username: true,
-            avatar: true,
-          },
+          select: { id: true, username: true, avatar: true },
         },
       },
     });
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
     const token = req.cookies?.token;
-
     if (token) {
       return jwt.verify(
         token,
         process.env.JWT_SECRET_KEY,
         async (err, payload) => {
-          // ✅ Add return to prevent further execution
           if (!err) {
             const saved = await prisma.savedPost.findUnique({
               where: {
@@ -60,39 +63,38 @@ export const getPost = async (req, res) => {
                 },
               },
             });
-            return res
-              .status(200)
-              .json({ ...post, isSaved: saved ? true : false }); // ✅ Use return here
+            return res.status(200).json({ ...post, isSaved: Boolean(saved) });
           }
-          return res.status(200).json({ ...post, isSaved: false }); // ✅ Also return here
+          return res.status(200).json({ ...post, isSaved: false });
         }
       );
     }
 
-    return res.status(200).json({ ...post, isSaved: false }); // ✅ Return the response to prevent double execution
+    res.status(200).json({ ...post, isSaved: false });
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: "Failed to get post" });
+    console.error(err);
+    if (err.code === "P2023") {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    res.status(500).json({ message: "Failed to get post" });
   }
 };
 
 export const addPost = async (req, res) => {
-  const body = req.body;
+  const { postData, postDetail } = req.body;
   const tokenUserId = req.userId;
 
   try {
     const newPost = await prisma.post.create({
       data: {
-        ...body.postData,
+        ...postData,
         userId: tokenUserId,
-        postDetail: {
-          create: body.postDetail,
-        },
+        postDetail: { create: postDetail },
       },
     });
     res.status(200).json(newPost);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     res.status(500).json({ message: "Failed to create post" });
   }
 };
@@ -102,72 +104,67 @@ export const updatePost = async (req, res) => {
   const tokenUserId = req.userId;
   const { postData, postDetail } = req.body;
 
+  if (!isValidObjectId(id)) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+
   try {
-    // Find the post to ensure it exists and that the user is authorized.
-    const existingPost = await prisma.post.findUnique({ where: { id } });
-    if (!existingPost) {
+    const existing = await prisma.post.findUnique({ where: { id } });
+    if (!existing) {
       return res.status(404).json({ message: "Post not found" });
     }
-    if (existingPost.userId !== tokenUserId) {
+    if (existing.userId !== tokenUserId) {
       return res.status(403).json({ message: "Not Authorized!" });
     }
 
-    // Update the post along with its postDetail
-    const updatedPost = await prisma.post.update({
+    const updated = await prisma.post.update({
       where: { id },
       data: {
         ...postData,
-        postDetail: {
-          update: { ...postDetail },
-        },
+        postDetail: { update: postDetail },
       },
       include: { postDetail: true },
     });
-
-    res.status(200).json(updatedPost);
+    res.status(200).json(updated);
   } catch (err) {
     console.error(err);
+    if (err.code === "P2023") {
+      return res.status(404).json({ message: "Post not found" });
+    }
     res.status(500).json({ message: "Failed to update post" });
   }
 };
 
 export const deletePost = async (req, res) => {
   const { id } = req.params;
-  const tokenUserId = req.userId; // Set by verifyToken middleware
+  const tokenUserId = req.userId;
+
+  if (!isValidObjectId(id)) {
+    return res.status(404).json({ message: "Post not found" });
+  }
 
   try {
-    // Fetch the post along with its postDetail relation
     const post = await prisma.post.findUnique({
       where: { id },
       include: { postDetail: true },
     });
-
     if (!post) {
-      console.log("Post not found:", id);
       return res.status(404).json({ message: "Post not found" });
     }
-
     if (post.userId !== tokenUserId) {
-      console.log(`User ${tokenUserId} is not authorized to delete post ${id}`);
       return res.status(403).json({ message: "Not Authorized!" });
     }
 
-    // If the post has a related PostDetail, delete it first
     if (post.postDetail) {
-      await prisma.postDetail.delete({
-        where: { postId: id },
-      });
+      await prisma.postDetail.delete({ where: { postId: id } });
     }
-
-    // Now delete the Post
-    await prisma.post.delete({
-      where: { id },
-    });
-
-    console.log(`Post ${id} deleted by user ${tokenUserId}`);
-    return res.status(200).json({ message: "Post deleted" });
+    await prisma.post.delete({ where: { id } });
+    res.status(200).json({ message: "Post deleted" });
   } catch (err) {
-    console.error("Error deleting post:", err);
-    return res.status(500).json({ message: "Failed to delete post" });
+    console.error(err);
+    if (err.code === "P2023") {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    res.status(500).json({ message: "Failed to delete post" });
   }
 };
